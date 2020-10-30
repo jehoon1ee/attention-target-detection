@@ -6,6 +6,7 @@ import torchvision
 from torchvision import datasets, transforms
 import pandas as pd
 import numpy as np
+%matplotlib inline
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 from PIL import Image
