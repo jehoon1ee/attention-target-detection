@@ -83,7 +83,7 @@ def run():
             inout = 1 / (1 + np.exp(-inout))
             inout = (1 - inout) * 255
             # norm_map = imresize(raw_hm, (height, width)) - inout
-            norm_map = np.array(Image.fromarray(raw_hm).resize(height, width)) - inout
+            norm_map = np.array(Image.fromarray(raw_hm).resize((height, width))) - inout
 
             # vis
             plt.close()
