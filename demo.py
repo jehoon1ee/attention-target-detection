@@ -86,6 +86,7 @@ def run():
             norm_map = np.array(Image.fromarray(raw_hm).resize((height, width))) - inout
 
             # vis
+            matplotlib.use("Qt5Agg")
             plt.close()
             fig = plt.figure()
             fig.canvas.manager.window.move(0,0)
