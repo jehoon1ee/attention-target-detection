@@ -107,7 +107,7 @@ def run():
                 plt.imshow(norm_map, cmap = 'jet', alpha=0.2, vmin=0, vmax=255)
 
             print ("point 1")
-            plt.show(block=True)
+            plt.show(block=False)
             print ("point 2")
             plt.pause(0.2)
 
