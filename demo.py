@@ -86,29 +86,28 @@ def run():
             norm_map = np.array(Image.fromarray(raw_hm).resize((height, width))) - inout
 
             # vis
-            # plt.use("Qt5Agg")
-            # plt.close()
-            # fig = plt.figure()
-            # # fig.canvas.manager.window.move(0,0)
-            # plt.axis('off')
-            # plt.imshow(frame_raw)
-            #
-            # ax = plt.gca()
-            # rect = patches.Rectangle((head_box[0], head_box[1]), head_box[2]-head_box[0], head_box[3]-head_box[1], linewidth=2, edgecolor=(0,1,0), facecolor='none')
-            # ax.add_patch(rect)
-            #
-            # if args.vis_mode == 'arrow':
-            #     if inout < args.out_threshold: # in-frame gaze
-            #         pred_x, pred_y = evaluation.argmax_pts(raw_hm)
-            #         norm_p = [pred_x/output_resolution, pred_y/output_resolution]
-            #         circ = patches.Circle((norm_p[0]*width, norm_p[1]*height), height/50.0, facecolor=(0,1,0), edgecolor='none')
-            #         ax.add_patch(circ)
-            #         plt.plot((norm_p[0]*width,(head_box[0]+head_box[2])/2), (norm_p[1]*height,(head_box[1]+head_box[3])/2), '-', color=(0,1,0,1))
-            # else:
-            #     plt.imshow(norm_map, cmap = 'jet', alpha=0.2, vmin=0, vmax=255)
-            #
-            # plt.show(block=False)
-            # plt.pause(0.2)
+            plt.close()
+            fig = plt.figure()
+            # fig.canvas.manager.window.move(0,0)
+            plt.axis('off')
+            plt.imshow(frame_raw)
+
+            ax = plt.gca()
+            rect = patches.Rectangle((head_box[0], head_box[1]), head_box[2]-head_box[0], head_box[3]-head_box[1], linewidth=2, edgecolor=(0,1,0), facecolor='none')
+            ax.add_patch(rect)
+
+            if args.vis_mode == 'arrow':
+                if inout < args.out_threshold: # in-frame gaze
+                    pred_x, pred_y = evaluation.argmax_pts(raw_hm)
+                    norm_p = [pred_x/output_resolution, pred_y/output_resolution]
+                    circ = patches.Circle((norm_p[0]*width, norm_p[1]*height), height/50.0, facecolor=(0,1,0), edgecolor='none')
+                    ax.add_patch(circ)
+                    plt.plot((norm_p[0]*width,(head_box[0]+head_box[2])/2), (norm_p[1]*height,(head_box[1]+head_box[3])/2), '-', color=(0,1,0,1))
+            else:
+                plt.imshow(norm_map, cmap = 'jet', alpha=0.2, vmin=0, vmax=255)
+
+            plt.show(block=False)
+            plt.pause(0.2)
 
         print('DONE!')
 
