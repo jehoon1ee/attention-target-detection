@@ -9,21 +9,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 from PIL import Image
-# from scipy.misc import imresize
-
 from model import ModelSpatial
 from utils import imutils, evaluation
 from config import *
-
-
-parser = argparse.ArgumentParser()
-parser.add_argument('--model_weights', type=str, help='model weights', default='model_demo.pt')
-parser.add_argument('--image_dir', type=str, help='images', default='data/demo/frames')
-parser.add_argument('--head', type=str, help='head bounding boxes', default='data/demo/person1.txt')
-parser.add_argument('--vis_mode', type=str, help='heatmap or arrow', default='heatmap')
-parser.add_argument('--out_threshold', type=int, help='out-of-frame target dicision threshold', default=100)
-args = parser.parse_args()
-
+import easydict
+import torchvision.models as models
+import torch.autograd.profiler as profiler
 
 def _get_transform():
     transform_list = []
@@ -32,8 +23,15 @@ def _get_transform():
     transform_list.append(transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]))
     return transforms.Compose(transform_list)
 
-
 def run():
+    args = easydict.EasyDict({
+        "model_weights": "model_demo.pt",
+        "image_dir": "data/demo/frames",
+        "head": "data/demo/person1.txt",
+        "vis_mode": "heatmap",
+        "out_threshold": 100
+    })
+
     column_names = ['frame', 'left', 'top', 'right', 'bottom']
     df = pd.read_csv(args.head, names=column_names, index_col=0)
     df['left'] -= (df['right']-df['left'])*0.1
@@ -54,11 +52,14 @@ def run():
     model.cuda()
     model.train(False)
 
+    print(df.index)
+
     with torch.no_grad():
         for i in df.index:
             frame_raw = Image.open(os.path.join(args.image_dir, i))
             frame_raw = frame_raw.convert('RGB')
             width, height = frame_raw.size
+            # print ("frame_raw width: ", width, "height: ", height)
 
             head_box = [df.loc[i,'left'], df.loc[i,'top'], df.loc[i,'right'], df.loc[i,'bottom']]
 
@@ -74,16 +75,25 @@ def run():
             head_channel = head_channel.unsqueeze(0).cuda()
 
             # forward pass
+            # with profiler.profile(record_shapes=True, profile_memory=True, use_cuda=True) as prof:
             raw_hm, _, inout = model(frame, head_channel, head)
+            # print(prof.key_averages().table(sort_by="cpu_time_total", row_limit=20))
+            # prof.export_chrome_trace("trace.json")
 
             # heatmap modulation
             raw_hm = raw_hm.cpu().detach().numpy() * 255
             raw_hm = raw_hm.squeeze()
+            # print ("raw_hm shape: ", raw_hm.shape)
+            # print ("raw_hm: ", raw_hm)
+
             inout = inout.cpu().detach().numpy()
             inout = 1 / (1 + np.exp(-inout))
             inout = (1 - inout) * 255
+
             # norm_map = imresize(raw_hm, (height, width)) - inout
-            norm_map = np.array(Image.fromarray(raw_hm).resize((height, width))) - inout
+            norm_map = np.array(Image.fromarray(raw_hm).resize((width, height))) - inout
+            # print("norm_map shape: ", norm_map.shape)
+            # print (norm_map)
 
             # vis
             plt.close()
@@ -96,23 +106,11 @@ def run():
             rect = patches.Rectangle((head_box[0], head_box[1]), head_box[2]-head_box[0], head_box[3]-head_box[1], linewidth=2, edgecolor=(0,1,0), facecolor='none')
             ax.add_patch(rect)
 
-            if args.vis_mode == 'arrow':
-                if inout < args.out_threshold: # in-frame gaze
-                    pred_x, pred_y = evaluation.argmax_pts(raw_hm)
-                    norm_p = [pred_x/output_resolution, pred_y/output_resolution]
-                    circ = patches.Circle((norm_p[0]*width, norm_p[1]*height), height/50.0, facecolor=(0,1,0), edgecolor='none')
-                    ax.add_patch(circ)
-                    plt.plot((norm_p[0]*width,(head_box[0]+head_box[2])/2), (norm_p[1]*height,(head_box[1]+head_box[3])/2), '-', color=(0,1,0,1))
-            else:
-                plt.imshow(norm_map, cmap = 'jet', alpha=0.2, vmin=0, vmax=255)
+            # print ("inout: ", inout)
+            # print ("out_threshold: ", args.out_threshold)
 
-            print ("point 1")
+            plt.imshow(norm_map, cmap = 'jet', alpha=0.2, vmin=0, vmax=255)
+
             plt.show(block=False)
-            print ("point 2")
-            plt.pause(0.2)
 
         print('DONE!')
-
-
-if __name__ == "__main__":
-    run()
