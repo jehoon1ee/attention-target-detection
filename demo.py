@@ -13,8 +13,12 @@ from model import ModelSpatial
 from utils import imutils, evaluation
 from config import *
 import easydict
+
 import torchvision.models as models
-import torch.autograd.profiler as profiler
+# import torch.autograd.profiler as profiler
+
+import torch.cuda.profiler as profiler
+import pyprof
 
 def _get_transform():
     transform_list = []
@@ -24,6 +28,8 @@ def _get_transform():
     return transforms.Compose(transform_list)
 
 def run():
+    pyprof.init()
+
     args = easydict.EasyDict({
         "model_weights": "model_demo.pt",
         "image_dir": "data/demo/frames",
@@ -76,7 +82,8 @@ def run():
 
             # forward pass
             # with profiler.profile(record_shapes=True, profile_memory=True, use_cuda=True) as prof:
-            raw_hm, _, inout = model(frame, head_channel, head)
+            with torch.autograd.profiler.emit_nvtx():
+                raw_hm, _, inout = model(frame, head_channel, head)
             # print(prof.key_averages().table(sort_by="cpu_time_total", row_limit=20))
             # prof.export_chrome_trace("trace.json")
 
