@@ -82,12 +82,19 @@ def test():
             print("lengths_val.type: ", type(lengths_val))
 
             # X_pad_data_img, X_pad_sizes = pack_padded_sequence(img_val, lengths_val, batch_first=True)
-            X_pad_data_img = pack_padded_sequence(img_val, lengths_val, batch_first=True)
-            X_pad_data_head, _ = pack_padded_sequence(head_channel_val, lengths_val, batch_first=True)
-            X_pad_data_face, _ = pack_padded_sequence(face_val, lengths_val, batch_first=True)
-            Y_pad_data_cont_gaze, _ = pack_padded_sequence(cont_gaze, lengths_val, batch_first=True)
-            Y_pad_data_heatmap, _ = pack_padded_sequence(gaze_heatmap_val, lengths_val, batch_first=True)
-            Y_pad_data_inout, _ = pack_padded_sequence(inout_label_val, lengths_val, batch_first=True)
+            tmp_img = pack_padded_sequence(img_val, lengths_val, batch_first=True)
+            X_pad_data_img = tmp_img.data
+            X_pad_sizes = tmp_img.batch_sizes
+            tmp_head = pack_padded_sequence(head_channel_val, lengths_val, batch_first=True)
+            X_pad_data_head = tmp_head.data
+            tmp_face = pack_padded_sequence(face_val, lengths_val, batch_first=True)
+            X_pad_data_face = tmp_face.data
+            tmp_cont_gaze = pack_padded_sequence(cont_gaze, lengths_val, batch_first=True)
+            Y_pad_data_cont_gaze = tmp_cont_gaze.data
+            tmp_gaze = pack_padded_sequence(gaze_heatmap_val, lengths_val, batch_first=True)
+            Y_pad_data_heatmap = tmp_gaze.data
+            tmp_inout = pack_padded_sequence(inout_label_val, lengths_val, batch_first=True)
+            Y_pad_data_inout = tmp_inout.data
 
             hx = (torch.zeros((num_lstm_layers, args.batch_size, 512, 7, 7)).cuda(device),
                   torch.zeros((num_lstm_layers, args.batch_size, 512, 7, 7)).cuda(device)) # (num_layers, batch_size, feature dims)
