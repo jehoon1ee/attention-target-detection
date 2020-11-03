@@ -72,9 +72,12 @@ def test():
         for batch_val, (img_val, face_val, head_channel_val, gaze_heatmap_val, cont_gaze, inout_label_val, lengths_val) in enumerate(val_loader):
             print('\tprogress = ', batch_val+1, '/', len(val_loader))
             print("img_val.shape: ", img_val.shape)
-            print("lengths_val: ", lengths_val)
+            print("face_val.shape: ", face_val.shape)
             print("head_channel_val.shape: ", head_channel_val.shape)
             print("gaze_heatmap_val.shape: ", gaze_heatmap_val.shape)
+            print("cont_gze.shape: ", cont_gaze.shape)
+            print("inout_label_val.shape: ", inout_label_val.shape)
+            print("lengths_val: ", lengths_val)
             X_pad_data_img, X_pad_sizes = pack_padded_sequence(img_val, lengths_val, batch_first=True)
             X_pad_data_head, _ = pack_padded_sequence(head_channel_val, lengths_val, batch_first=True)
             X_pad_data_face, _ = pack_padded_sequence(face_val, lengths_val, batch_first=True)
