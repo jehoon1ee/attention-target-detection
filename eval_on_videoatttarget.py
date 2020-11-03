@@ -71,7 +71,7 @@ def test():
     with torch.no_grad():
         for batch_val, (img_val, face_val, head_channel_val, gaze_heatmap_val, cont_gaze, inout_label_val, lengths_val) in enumerate(val_loader):
             print('\tprogress = ', batch_val+1, '/', len(val_loader))
-            print("img_val: ", img_val)
+            print("img_val.shape: ", img_val.shape)
             print("lengths_val: ", lengths_val)
             X_pad_data_img, X_pad_sizes = pack_padded_sequence(img_val, lengths_val, batch_first=True)
             X_pad_data_head, _ = pack_padded_sequence(head_channel_val, lengths_val, batch_first=True)
