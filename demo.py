@@ -19,6 +19,7 @@ import torchvision.models as models
 
 import torch.cuda.profiler as profiler
 import pyprof
+pyprof.init()
 
 def _get_transform():
     transform_list = []
@@ -28,7 +29,6 @@ def _get_transform():
     return transforms.Compose(transform_list)
 
 def run():
-    pyprof.init()
 
     args = easydict.EasyDict({
         "model_weights": "model_demo.pt",
