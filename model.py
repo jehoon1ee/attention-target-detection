@@ -421,6 +421,8 @@ class ModelSpatioTemporal(nn.Module):
         encoding = self.compress_bn2(encoding)
         encoding = self.relu(encoding)
 
+        print("encoding shape: ", encoding.shape)
+
         # RW edit: x should be of shape (size, channel, width, height)
         x_pad = PackedSequence(encoding, batch_sizes)
         y, hx = self.convlstm_scene(x_pad, hx=hidden_scene)
