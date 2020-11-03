@@ -103,6 +103,7 @@ def test():
 
             for i in range(0, lengths_val[0], chunk_size):
                 X_pad_sizes_slice = X_pad_sizes[i:i + chunk_size].cuda(device)
+                print("X_pad_sizes_slice: ", X_pad_sizes_slice)
                 curr_length = np.sum(X_pad_sizes_slice.cpu().detach().numpy())
                 # slice padded data
                 X_pad_data_slice_img = X_pad_data_img[last_index:last_index + curr_length].cuda(device)
@@ -116,6 +117,7 @@ def test():
                 # detach previous hidden states to stop gradient flow
                 prev_hx = (hx[0][:, :min(X_pad_sizes_slice[0], previous_hx_size), :, :, :].detach(),
                            hx[1][:, :min(X_pad_sizes_slice[0], previous_hx_size), :, :, :].detach())
+                print("prev_hx.shape: ", prev_hx.shape)
 
                 # forward pass
                 deconv, inout_val, hx = model(X_pad_data_slice_img, X_pad_data_slice_head, X_pad_data_slice_face, \
