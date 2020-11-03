@@ -237,41 +237,41 @@ class ModelSpatial(nn.Module):
             scene_feat = self.layer5_scene(im)
         print(prof_scene.key_averages(group_by_input_shape=True).table(sort_by="cuda_time_total", row_limit=20))
         # attn_weights = torch.ones(attn_weights.shape)/49.0
-        attn_applied_scene_feat = torch.mul(attn_weights, scene_feat) # (N, 1, 7, 7) # applying attention weights on scene feat
 
-        scene_face_feat = torch.cat((attn_applied_scene_feat, face_feat), 1)
+        with profiler.profile(record_shapes=True, profile_memory=True, use_cuda=True) as prof_remaining:
+            attn_applied_scene_feat = torch.mul(attn_weights, scene_feat) # (N, 1, 7, 7) # applying attention weights on scene feat
 
-        # scene + face feat -> in/out
-        encoding_inout = self.compress_conv1_inout(scene_face_feat)
-        encoding_inout = self.compress_bn1_inout(encoding_inout)
-        encoding_inout = self.relu(encoding_inout)
-        encoding_inout = self.compress_conv2_inout(encoding_inout)
-        encoding_inout = self.compress_bn2_inout(encoding_inout)
-        encoding_inout = self.relu(encoding_inout)
-        encoding_inout = encoding_inout.view(-1, 49)
-        encoding_inout = self.fc_inout(encoding_inout)
-        print("encoding_inout shape: ", encoding_inout.shape)
+            scene_face_feat = torch.cat((attn_applied_scene_feat, face_feat), 1)
 
-        # scene + face feat -> encoding -> decoding
-        encoding = self.compress_conv1(scene_face_feat)
-        encoding = self.compress_bn1(encoding)
-        encoding = self.relu(encoding)
-        encoding = self.compress_conv2(encoding)
-        encoding = self.compress_bn2(encoding)
-        encoding = self.relu(encoding)
-        print("encoding shape: ", encoding.shape)
+            # scene + face feat -> in/out
+            encoding_inout = self.compress_conv1_inout(scene_face_feat)
+            encoding_inout = self.compress_bn1_inout(encoding_inout)
+            encoding_inout = self.relu(encoding_inout)
+            encoding_inout = self.compress_conv2_inout(encoding_inout)
+            encoding_inout = self.compress_bn2_inout(encoding_inout)
+            encoding_inout = self.relu(encoding_inout)
+            encoding_inout = encoding_inout.view(-1, 49)
+            encoding_inout = self.fc_inout(encoding_inout)
 
-        x = self.deconv1(encoding)
-        x = self.deconv_bn1(x)
-        x = self.relu(x)
-        x = self.deconv2(x)
-        x = self.deconv_bn2(x)
-        x = self.relu(x)
-        x = self.deconv3(x)
-        x = self.deconv_bn3(x)
-        x = self.relu(x)
-        x = self.conv4(x)
-        print("x shape: ", x.shape)
+            # scene + face feat -> encoding -> decoding
+            encoding = self.compress_conv1(scene_face_feat)
+            encoding = self.compress_bn1(encoding)
+            encoding = self.relu(encoding)
+            encoding = self.compress_conv2(encoding)
+            encoding = self.compress_bn2(encoding)
+            encoding = self.relu(encoding)
+
+            x = self.deconv1(encoding)
+            x = self.deconv_bn1(x)
+            x = self.relu(x)
+            x = self.deconv2(x)
+            x = self.deconv_bn2(x)
+            x = self.relu(x)
+            x = self.deconv3(x)
+            x = self.deconv_bn3(x)
+            x = self.relu(x)
+            x = self.conv4(x)
+        print(prof_remaining.key_averages(group_by_input_shape=True).table(sort_by="cuda_time_total", row_limit=20))
 
         return x, torch.mean(attn_weights, 1, keepdim=True), encoding_inout
 
