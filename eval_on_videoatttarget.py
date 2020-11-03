@@ -12,7 +12,7 @@ from lib.pytorch_convolutional_rnn import convolutional_rnn
 import argparse
 import os
 import numpy as np
-from scipy.misc import imresize
+# from scipy.misc import imresize
 import warnings
 
 from PIL import Image
