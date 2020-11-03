@@ -82,4 +82,3 @@ dependencies:
     - dlib==19.19.0
     - protobuf==3.7.0
 prefix: /home/eunji/anaconda3/envs/snakes
-

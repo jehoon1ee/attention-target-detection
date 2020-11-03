@@ -436,7 +436,8 @@ class ModelSpatioTemporal(nn.Module):
         print("encoding shape: ", encoding.shape)
 
         # RW edit: x should be of shape (size, channel, width, height)
-        x_pad = PackedSequence(encoding, batch_sizes)
+        # x_pad = PackedSequence(encoding, batch_sizes)
+        x_pad = pack_padded_sequence(encoding, batch_sizes)
         y, hx = self.convlstm_scene(x_pad, hx=hidden_scene)
         deconv = y.data
 
