@@ -73,6 +73,8 @@ def test():
             print('\tprogress = ', batch_val+1, '/', len(val_loader))
             print("img_val.shape: ", img_val.shape)
             print("lengths_val: ", lengths_val)
+            print("head_channel_val.shape: ", head_channel_val.shape)
+            print("gaze_heatmap_val.shape: ", gaze_heatmap_val.shape)
             X_pad_data_img, X_pad_sizes = pack_padded_sequence(img_val, lengths_val, batch_first=True)
             X_pad_data_head, _ = pack_padded_sequence(head_channel_val, lengths_val, batch_first=True)
             X_pad_data_face, _ = pack_padded_sequence(face_val, lengths_val, batch_first=True)
