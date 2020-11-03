@@ -15,6 +15,8 @@ import numpy as np
 from scipy.misc import imresize
 import warnings
 
+from PIL import Image
+
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
 
@@ -111,7 +113,8 @@ def test():
                         multi_hot = (multi_hot > 0).float() * 1 # make GT heatmap as binary labels
                         multi_hot = misc.to_numpy(multi_hot)
 
-                        scaled_heatmap = imresize(deconv[b_i].squeeze(), (output_resolution, output_resolution), interp = 'bilinear')
+                        # scaled_heatmap = imresize(deconv[b_i].squeeze(), (output_resolution, output_resolution), interp = 'bilinear')
+                        scaled_heatmap = np.array(Image.fromarray(deconv[b_i].squeeze()).resize((output_resolution, output_resolution), PIL.Image.BILNEAR))
                         auc_score = evaluation.auc(scaled_heatmap, multi_hot)
                         AUC.append(auc_score)
 
