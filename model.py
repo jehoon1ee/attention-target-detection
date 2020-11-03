@@ -6,6 +6,10 @@ import math
 from lib.pytorch_convolutional_rnn import convolutional_rnn
 import numpy as np
 
+# pytorch profiler
+import torchvision.models as models
+import torch.autograd.profiler as profiler
+
 
 class Bottleneck(nn.Module):
     expansion = 4
@@ -197,15 +201,16 @@ class ModelSpatial(nn.Module):
 
 
     def forward(self, images, head, face):
-        face = self.conv1_face(face)
-        face = self.bn1_face(face)
-        face = self.relu(face)
-        face = self.maxpool(face)
-        face = self.layer1_face(face)
-        face = self.layer2_face(face)
-        face = self.layer3_face(face)
-        face = self.layer4_face(face)
-        face_feat = self.layer5_face(face)
+        with profiler.profile(record_shapes=True, profile_memory=True, use_cuda=True) as prof_head:
+            face = self.conv1_face(face)
+            face = self.bn1_face(face)
+            face = self.relu(face)
+            face = self.maxpool(face)
+            face = self.layer1_face(face)
+            face = self.layer2_face(face)
+            face = self.layer3_face(face)
+            face = self.layer4_face(face)
+            face_feat = self.layer5_face(face)
 
         # reduce head channel size by max pooling: (N, 1, 224, 224) -> (N, 1, 28, 28)
         head_reduced = self.maxpool(self.maxpool(self.maxpool(head))).view(-1, 784)
@@ -264,7 +269,7 @@ class ModelSpatial(nn.Module):
         x = self.conv4(x)
         print("x shape: ", x.shape)
 
-        return x, torch.mean(attn_weights, 1, keepdim=True), encoding_inout
+        return x, torch.mean(attn_weights, 1, keepdim=True), encoding_inout, prof_head
 
 
 class ModelSpatioTemporal(nn.Module):
