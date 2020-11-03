@@ -87,7 +87,7 @@ def run():
             # raw_hm, _, inout = model(frame, head_channel, head)
             # print(prof.key_averages(group_by_input_shape=True).table(sort_by="cuda_time_total", row_limit=20))
             # print(prof.key_averages(group_by_input_shape=True).table(sort_by="cuda_memory_usage", row_limit=20))
-            raw_hm, inout, hx = model(frame, head_channel, head, hx)
+            raw_hm, inout, hx = model(frame, head_channel, head, hx, [1,1,1,1])
 
             # pyprof
             # with torch.autograd.profiler.emit_nvtx():
