@@ -9,7 +9,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 from PIL import Image
-from model import ModelSpatioTemporal
+from model import ModelSpatial
 from utils import imutils, evaluation
 from config import *
 import easydict
@@ -48,7 +48,7 @@ def run():
     # set up data transformation
     test_transforms = _get_transform()
 
-    model = ModelSpatioTemporal()
+    model = ModelSpatial()
     model_dict = model.state_dict()
     pretrained_dict = torch.load(args.model_weights)
     pretrained_dict = pretrained_dict['model']
@@ -83,11 +83,10 @@ def run():
             head_channel = head_channel.unsqueeze(0).cuda()
 
             # forward pass
-            # with profiler.profile(record_shapes=True, profile_memory=True, use_cuda=True) as prof:
-            # raw_hm, _, inout = model(frame, head_channel, head)
-            # print(prof.key_averages(group_by_input_shape=True).table(sort_by="cuda_time_total", row_limit=20))
-            # print(prof.key_averages(group_by_input_shape=True).table(sort_by="cuda_memory_usage", row_limit=20))
-            raw_hm, inout, hx = model(frame, head_channel, head, hx, torch.tensor([1,1,1,1]))
+            with profiler.profile(record_shapes=True, profile_memory=True, use_cuda=True) as prof:
+            raw_hm, _, inout = model(frame, head_channel, head)
+            print(prof.key_averages(group_by_input_shape=True).table(sort_by="cuda_time_total", row_limit=20))
+            print(prof.key_averages(group_by_input_shape=True).table(sort_by="cuda_memory_usage", row_limit=20))
 
             # pyprof
             # with torch.autograd.profiler.emit_nvtx():
