@@ -62,68 +62,67 @@ def run():
 
     hx = None
 
-    with profiler.profile(record_shapes=True, profile_memory=True, use_cuda=True) as prof:
-        with torch.no_grad():
-            for i in df.index:
-                frame_raw = Image.open(os.path.join(args.image_dir, i))
-                frame_raw = frame_raw.convert('RGB')
-                width, height = frame_raw.size
-                # print ("frame_raw width: ", width, "height: ", height)
+    with torch.no_grad():
+        for i in df.index:
+            frame_raw = Image.open(os.path.join(args.image_dir, i))
+            frame_raw = frame_raw.convert('RGB')
+            width, height = frame_raw.size
+            # print ("frame_raw width: ", width, "height: ", height)
 
-                head_box = [df.loc[i,'left'], df.loc[i,'top'], df.loc[i,'right'], df.loc[i,'bottom']]
+            head_box = [df.loc[i,'left'], df.loc[i,'top'], df.loc[i,'right'], df.loc[i,'bottom']]
 
-                head = frame_raw.crop((head_box)) # head crop
+            head = frame_raw.crop((head_box)) # head crop
 
-                head = test_transforms(head) # transform inputs
-                frame = test_transforms(frame_raw)
-                head_channel = imutils.get_head_box_channel(head_box[0], head_box[1], head_box[2], head_box[3], width, height,
-                                                            resolution=input_resolution).unsqueeze(0)
+            head = test_transforms(head) # transform inputs
+            frame = test_transforms(frame_raw)
+            head_channel = imutils.get_head_box_channel(head_box[0], head_box[1], head_box[2], head_box[3], width, height,
+                                                        resolution=input_resolution).unsqueeze(0)
 
-                head = head.unsqueeze(0).cuda()
-                frame = frame.unsqueeze(0).cuda()
-                head_channel = head_channel.unsqueeze(0).cuda()
+            head = head.unsqueeze(0).cuda()
+            frame = frame.unsqueeze(0).cuda()
+            head_channel = head_channel.unsqueeze(0).cuda()
 
-                # forward pass
-                raw_hm, _, inout = model(frame, head_channel, head)
+            # forward pass
+            raw_hm, _, inout = model(frame, head_channel, head)
 
-                # pyprof
-                # with torch.autograd.profiler.emit_nvtx():
-                #     raw_hm, _, inout = model(frame, head_channel, head)
+            # pyprof
+            # with torch.autograd.profiler.emit_nvtx():
+            #     raw_hm, _, inout = model(frame, head_channel, head)
 
-                # heatmap modulation
-                raw_hm = raw_hm.cpu().detach().numpy() * 255
-                raw_hm = raw_hm.squeeze()
-                # print ("raw_hm shape: ", raw_hm.shape)
-                # print ("raw_hm: ", raw_hm)
+            # heatmap modulation
+            raw_hm = raw_hm.cpu().detach().numpy() * 255
+            raw_hm = raw_hm.squeeze()
+            # print ("raw_hm shape: ", raw_hm.shape)
+            # print ("raw_hm: ", raw_hm)
 
-                inout = inout.cpu().detach().numpy()
-                inout = 1 / (1 + np.exp(-inout))
-                inout = (1 - inout) * 255
+            inout = inout.cpu().detach().numpy()
+            inout = 1 / (1 + np.exp(-inout))
+            inout = (1 - inout) * 255
 
-                # norm_map = imresize(raw_hm, (height, width)) - inout
-                norm_map = np.array(Image.fromarray(raw_hm).resize((width, height))) - inout
-                # print("norm_map shape: ", norm_map.shape)
-                # print (norm_map)
+            # norm_map = imresize(raw_hm, (height, width)) - inout
+            norm_map = np.array(Image.fromarray(raw_hm).resize((width, height))) - inout
+            # print("norm_map shape: ", norm_map.shape)
+            # print (norm_map)
 
-                # vis
-                plt.close()
-                fig = plt.figure()
-                # fig.canvas.manager.window.move(0,0)
-                plt.axis('off')
-                plt.imshow(frame_raw)
+            # vis
+            plt.close()
+            fig = plt.figure()
+            # fig.canvas.manager.window.move(0,0)
+            plt.axis('off')
+            plt.imshow(frame_raw)
 
-                ax = plt.gca()
-                rect = patches.Rectangle((head_box[0], head_box[1]), head_box[2]-head_box[0], head_box[3]-head_box[1], linewidth=2, edgecolor=(0,1,0), facecolor='none')
-                ax.add_patch(rect)
+            ax = plt.gca()
+            rect = patches.Rectangle((head_box[0], head_box[1]), head_box[2]-head_box[0], head_box[3]-head_box[1], linewidth=2, edgecolor=(0,1,0), facecolor='none')
+            ax.add_patch(rect)
 
-                # print ("inout: ", inout)
-                # print ("out_threshold: ", args.out_threshold)
+            # print ("inout: ", inout)
+            # print ("out_threshold: ", args.out_threshold)
 
-                plt.imshow(norm_map, cmap = 'jet', alpha=0.2, vmin=0, vmax=255)
+            plt.imshow(norm_map, cmap = 'jet', alpha=0.2, vmin=0, vmax=255)
 
-                plt.show(block=False)
+            plt.show(block=False)
 
-            print('DONE!')
+        print('DONE!')
 
     # print(prof.key_averages(group_by_input_shape=True).table(sort_by="cuda_time_total", row_limit=20))
 
