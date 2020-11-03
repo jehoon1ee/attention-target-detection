@@ -211,6 +211,7 @@ class ModelSpatial(nn.Module):
             face = self.layer3_face(face)
             face = self.layer4_face(face)
             face_feat = self.layer5_face(face)
+        print(prof_head.key_averages(group_by_input_shape=True).table(sort_by="cuda_time_total", row_limit=20))
 
         # reduce head channel size by max pooling: (N, 1, 224, 224) -> (N, 1, 28, 28)
         head_reduced = self.maxpool(self.maxpool(self.maxpool(head))).view(-1, 784)
@@ -269,7 +270,7 @@ class ModelSpatial(nn.Module):
         x = self.conv4(x)
         print("x shape: ", x.shape)
 
-        return x, torch.mean(attn_weights, 1, keepdim=True), encoding_inout, prof_head
+        return x, torch.mean(attn_weights, 1, keepdim=True), encoding_inout
 
 
 class ModelSpatioTemporal(nn.Module):
