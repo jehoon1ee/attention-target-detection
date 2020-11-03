@@ -224,15 +224,18 @@ class ModelSpatial(nn.Module):
         attn_weights = attn_weights.view(-1, 1, 7, 7)
 
         im = torch.cat((images, head), dim=1)
-        im = self.conv1_scene(im)
-        im = self.bn1_scene(im)
-        im = self.relu(im)
-        im = self.maxpool(im)
-        im = self.layer1_scene(im)
-        im = self.layer2_scene(im)
-        im = self.layer3_scene(im)
-        im = self.layer4_scene(im)
-        scene_feat = self.layer5_scene(im)
+
+        with profiler.profile(record_shapes=True, profile_memory=True, use_cuda=True) as prof_scene:
+            im = self.conv1_scene(im)
+            im = self.bn1_scene(im)
+            im = self.relu(im)
+            im = self.maxpool(im)
+            im = self.layer1_scene(im)
+            im = self.layer2_scene(im)
+            im = self.layer3_scene(im)
+            im = self.layer4_scene(im)
+            scene_feat = self.layer5_scene(im)
+        print(prof_scene.key_averages(group_by_input_shape=True).table(sort_by="cuda_time_total", row_limit=20))
         # attn_weights = torch.ones(attn_weights.shape)/49.0
         attn_applied_scene_feat = torch.mul(attn_weights, scene_feat) # (N, 1, 7, 7) # applying attention weights on scene feat
 
