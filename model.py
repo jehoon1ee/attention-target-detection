@@ -241,6 +241,7 @@ class ModelSpatial(nn.Module):
         encoding_inout = self.relu(encoding_inout)
         encoding_inout = encoding_inout.view(-1, 49)
         encoding_inout = self.fc_inout(encoding_inout)
+        print("encoding_inout shape: ", encoding_inout.shape)
 
         # scene + face feat -> encoding -> decoding
         encoding = self.compress_conv1(scene_face_feat)
@@ -249,6 +250,7 @@ class ModelSpatial(nn.Module):
         encoding = self.compress_conv2(encoding)
         encoding = self.compress_bn2(encoding)
         encoding = self.relu(encoding)
+        print("encoding shape: ", encoding.shape)
 
         x = self.deconv1(encoding)
         x = self.deconv_bn1(x)
@@ -260,6 +262,7 @@ class ModelSpatial(nn.Module):
         x = self.deconv_bn3(x)
         x = self.relu(x)
         x = self.conv4(x)
+        print("x shape: ", x.shape)
 
         return x, torch.mean(attn_weights, 1, keepdim=True), encoding_inout
 
