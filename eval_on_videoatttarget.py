@@ -80,7 +80,9 @@ def test():
             print("inout_label_val.shape: ", inout_label_val.shape)
             print("lengths_val: ", lengths_val)
             print("lengths_val.type: ", type(lengths_val))
-            X_pad_data_img, X_pad_sizes = pack_padded_sequence(img_val, lengths_val.tolist(), batch_first=True)
+
+            # X_pad_data_img, X_pad_sizes = pack_padded_sequence(img_val, lengths_val, batch_first=True)
+            X_pad_data_img = pack_padded_sequence(img_val, lengths_val, batch_first=True)
             X_pad_data_head, _ = pack_padded_sequence(head_channel_val, lengths_val, batch_first=True)
             X_pad_data_face, _ = pack_padded_sequence(face_val, lengths_val, batch_first=True)
             Y_pad_data_cont_gaze, _ = pack_padded_sequence(cont_gaze, lengths_val, batch_first=True)
