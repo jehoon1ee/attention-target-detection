@@ -84,7 +84,7 @@ def run():
 
             # forward pass
             with profiler.profile(record_shapes=True, profile_memory=True, use_cuda=True) as prof:
-            raw_hm, _, inout = model(frame, head_channel, head)
+                raw_hm, _, inout = model(frame, head_channel, head)
             print(prof.key_averages(group_by_input_shape=True).table(sort_by="cuda_time_total", row_limit=20))
             print(prof.key_averages(group_by_input_shape=True).table(sort_by="cuda_memory_usage", row_limit=20))
 
