@@ -92,7 +92,7 @@ def run():
             # heatmap modulation
             raw_hm = raw_hm.cpu().detach().numpy() * 255
             raw_hm = raw_hm.squeeze()
-            # print ("raw_hm shape: ", raw_hm.shape)
+            print ("raw_hm shape: ", raw_hm.shape)
             # print ("raw_hm: ", raw_hm)
 
             inout = inout.cpu().detach().numpy()
