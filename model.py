@@ -383,6 +383,9 @@ class ModelSpatioTemporal(nn.Module):
         return nn.Sequential(*layers)
 
     def forward(self, images, head, face, hidden_scene: tuple = None, batch_sizes: list = None):
+        print("images.shape: ", images.shape)
+        print("head.shape: ", head.shape)
+        print("face.shape: ", face.shape)
         face = self.conv1_face(face)
         face = self.bn1_face(face)
         face = self.relu(face)

@@ -118,7 +118,7 @@ def test():
                 # detach previous hidden states to stop gradient flow
                 prev_hx = (hx[0][:, :min(X_pad_sizes_slice[0], previous_hx_size), :, :, :].detach(),
                            hx[1][:, :min(X_pad_sizes_slice[0], previous_hx_size), :, :, :].detach())
-                print("prev_hx: ", prev_hx)
+                # print("prev_hx: ", prev_hx)
 
                 # forward pass
                 deconv, inout_val, hx = model(X_pad_data_slice_img, X_pad_data_slice_head, X_pad_data_slice_face, \
