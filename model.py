@@ -386,6 +386,7 @@ class ModelSpatioTemporal(nn.Module):
         print("images.shape: ", images.shape)
         print("head.shape: ", head.shape)
         print("face.shape: ", face.shape)
+        print("batch_sizes: ", batch_sizes)
         face = self.conv1_face(face)
         face = self.bn1_face(face)
         face = self.relu(face)
@@ -435,13 +436,10 @@ class ModelSpatioTemporal(nn.Module):
         encoding = self.compress_conv2(encoding)
         encoding = self.compress_bn2(encoding)
         encoding = self.relu(encoding)
-
         print("encoding shape: ", encoding.shape)
 
         # RW edit: x should be of shape (size, channel, width, height)
         # x_pad = PackedSequence(encoding, batch_sizes)
-        print("encoding.shape: ", encoding.shape)
-        print("batch_sizes: ", batch_sizes)
         x_pad = pack_padded_sequence(encoding, batch_sizes, batch_first=True)
         y, hx = self.convlstm_scene(x_pad, hx=hidden_scene)
         deconv = y.data
