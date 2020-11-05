@@ -102,7 +102,8 @@ def test():
             previous_hx_size = args.batch_size
 
             for i in range(0, lengths_val[0], chunk_size):
-                X_pad_sizes_slice = X_pad_sizes[i:i + chunk_size].cuda(device)
+                # X_pad_sizes_slice = X_pad_sizes[i:i + chunk_size].cuda(device)
+                X_pad_sizes_slice = X_pad_sizes[i:i + chunk_size]
                 print("X_pad_sizes_slice: ", X_pad_sizes_slice)
                 curr_length = np.sum(X_pad_sizes_slice.cpu().detach().numpy())
                 # slice padded data
