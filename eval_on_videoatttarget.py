@@ -104,7 +104,7 @@ def test():
             for i in range(0, lengths_val[0], chunk_size):
                 # X_pad_sizes_slice = X_pad_sizes[i:i + chunk_size].cuda(device)
                 X_pad_sizes_slice = X_pad_sizes[i:i + chunk_size]
-                print("X_pad_sizes_slice: ", X_pad_sizes_slice)
+                # print("X_pad_sizes_slice: ", X_pad_sizes_slice)
                 curr_length = np.sum(X_pad_sizes_slice.cpu().detach().numpy())
                 # slice padded data
                 X_pad_data_slice_img = X_pad_data_img[last_index:last_index + curr_length].cuda(device)
