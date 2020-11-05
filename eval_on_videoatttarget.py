@@ -106,6 +106,7 @@ def test():
                 print("chunk_size: ", chunk_size)
                 # X_pad_sizes_slice = X_pad_sizes[i:i + chunk_size].cuda(device)
                 X_pad_sizes_slice = X_pad_sizes[i:i + chunk_size]
+                print("X_pad_sizes: ", X_pad_sizes)
                 print("X_pad_sizes_slice: ", X_pad_sizes_slice)
                 # print("X_pad_sizes_slice: ", X_pad_sizes_slice)
                 curr_length = np.sum(X_pad_sizes_slice.cpu().detach().numpy())
