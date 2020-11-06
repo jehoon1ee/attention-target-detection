@@ -39,9 +39,9 @@ def test():
     val_dataset = GazeFollow(gazefollow_val_data, gazefollow_val_label,
                       transform, input_size=input_resolution, output_size=output_resolution, test=True)
     val_loader = torch.utils.data.DataLoader(dataset=val_dataset,
-                                               batch_size=args.batch_size,
-                                               shuffle=True,
-                                               num_workers=0)
+                                             batch_size=args.batch_size,
+                                             shuffle=True,
+                                             num_workers=0)
 
     # Define device
     device = torch.device('cuda', args.device)
@@ -75,7 +75,8 @@ def test():
                 valid_gaze = valid_gaze[valid_gaze != -1].view(-1,2)
                 # AUC: area under curve of ROC
                 multi_hot = imutils.multi_hot_targets(cont_gaze[b_i], imsize[b_i])
-                scaled_heatmap = imresize(val_gaze_heatmap_pred[b_i], (imsize[b_i][1], imsize[b_i][0]), interp = 'bilinear')
+                # scaled_heatmap = imresize(val_gaze_heatmap_pred[b_i], (imsize[b_i][1], imsize[b_i][0]), interp = 'bilinear')
+                scaled_heatmap = np.array(Image.fromarray(val_gaze_heatmap_pred[b_i]).resize((imsize[b_i][1], imsize[b_i][0]), PIL.Image.BILNEAR))
                 auc_score = evaluation.auc(scaled_heatmap, multi_hot)
                 AUC.append(auc_score)
                 # min distance: minimum among all possible pairs of <ground truth point, predicted point>
