@@ -78,6 +78,7 @@ def test():
                 multi_hot = imutils.multi_hot_targets(cont_gaze[b_i], imsize[b_i])
                 # scaled_heatmap = imresize(val_gaze_heatmap_pred[b_i], (imsize[b_i][1], imsize[b_i][0]), interp = 'bilinear')
                 print("(imsize[b_i][1], imsize[b_i][0]): ", (imsize[b_i][1], imsize[b_i][0]))
+                print("val_gaze_heatmap_pred[b_i]: ", val_gaze_heatmap_pred[b_i])
                 tmp1 = imsize[b_i][1].item()
                 tmp2 = imsize[b_i][0].item()
                 scaled_heatmap = np.array(Image.fromarray(val_gaze_heatmap_pred[b_i]).resize((tmp1, tmp2), PIL.Image.BILNEAR))
