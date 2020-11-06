@@ -6,7 +6,7 @@ gazefollow_train_data = "data/gazefollow"
 gazefollow_train_label = "data/gazefollow/train_annotations.txt"
 gazefollow_val_data = "data/gazefollow"
 # gazefollow_val_label = "data/gazefollow/test_annotations_release.txt"
-gazefollow_val_label = "data/gazefollow/test_annotations.txt"
+gazefollow_val_label = "data/gazefollow/test_annotation.txt"
 
 
 # =============================================================================
