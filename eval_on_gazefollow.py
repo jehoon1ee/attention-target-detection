@@ -78,7 +78,7 @@ def test():
                 multi_hot = imutils.multi_hot_targets(cont_gaze[b_i], imsize[b_i])
                 # scaled_heatmap = imresize(val_gaze_heatmap_pred[b_i], (imsize[b_i][1], imsize[b_i][0]), interp = 'bilinear')
                 print("(imsize[b_i][1], imsize[b_i][0]): ", (imsize[b_i][1], imsize[b_i][0]))
-                scaled_heatmap = np.array(Image.fromarray(val_gaze_heatmap_pred[b_i]).resize((imsize[b_i][1], imsize[b_i][0]), PIL.Image.BILNEAR))
+                scaled_heatmap = np.array(Image.fromarray(val_gaze_heatmap_pred[b_i]).resize((imsize[b_i][1].item(), imsize[b_i][0].item()), PIL.Image.BILNEAR))
                 auc_score = evaluation.auc(scaled_heatmap, multi_hot)
                 AUC.append(auc_score)
                 # min distance: minimum among all possible pairs of <ground truth point, predicted point>
