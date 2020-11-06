@@ -172,7 +172,7 @@ def train():
                             # min distance: minimum among all possible pairs of <ground truth point, predicted point>
                             pred_x, pred_y = evaluation.argmax_pts(val_gaze_heatmap_pred[b_i].cpu().detach().numpy())
                             ###################### jehoonlee revision ######################
-                            
+
                             norm_p = [pred_x/float(output_resolution), pred_y/float(output_resolution)]
                             all_distances = []
                             for gt_gaze in valid_gaze:

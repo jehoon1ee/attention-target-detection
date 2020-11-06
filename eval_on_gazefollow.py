@@ -60,8 +60,14 @@ def test():
     print('Evaluation in progress ...')
     model.train(False)
     AUC = []; min_dist = []; avg_dist = []
+
+    i = 0
+    j = 0
+
     with torch.no_grad():
         for val_batch, (val_img, val_face, val_head_channel, val_gaze_heatmap, cont_gaze, imsize, _) in enumerate(val_loader):
+            print("\nj: ", j)
+
             val_images = val_img.cuda().to(device)
             val_head = val_head_channel.cuda().to(device)
             val_faces = val_face.cuda().to(device)
@@ -71,6 +77,9 @@ def test():
 
             # go through each data point and record AUC, min dist, avg dist
             for b_i in range(len(cont_gaze)):
+                print("i: ", i)
+                i += 1
+
                 # remove padding and recover valid ground truth points
                 valid_gaze = cont_gaze[b_i]
                 valid_gaze = valid_gaze[valid_gaze != -1].view(-1,2)
