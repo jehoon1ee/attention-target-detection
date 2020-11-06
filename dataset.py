@@ -82,6 +82,7 @@ class GazeFollow(Dataset):
             gaze_inside = bool(inout)
 
         # expand face bbox a bit
+        x_min, y_min, x_max, y_max = map(float, [x_min, y_min, x_max, y_max])
         k = 0.1
         x_min -= k * abs(x_max - x_min)
         y_min -= k * abs(y_max - y_min)
