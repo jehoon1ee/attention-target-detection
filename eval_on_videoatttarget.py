@@ -69,6 +69,7 @@ def test():
     AUC = []; in_vs_out_groundtruth = []; in_vs_out_pred = []; distance = []
     chunk_size = 3
     with torch.no_grad():
+        print("val_loader: ", val_loader)
         for batch_val, (img_val, face_val, head_channel_val, gaze_heatmap_val, cont_gaze, inout_label_val, lengths_val) in enumerate(val_loader):
             print('\tprogress = ', batch_val+1, '/', len(val_loader))
             print("img_val.shape: ", img_val.shape)
