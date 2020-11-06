@@ -10,7 +10,8 @@ from utils import imutils, evaluation
 import argparse
 import os
 import numpy as np
-from scipy.misc import imresize
+# from scipy.misc import imresize
+from PIL import Image
 import warnings
 
 warnings.simplefilter(action='ignore', category=FutureWarning)
