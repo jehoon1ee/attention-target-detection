@@ -12,7 +12,8 @@ import os
 from datetime import datetime
 import shutil
 import numpy as np
-from scipy.misc import imresize
+# from scipy.misc import imresize
+from PIL import Image
 from tensorboardX import SummaryWriter
 import warnings
 
@@ -153,11 +154,25 @@ def train():
                             valid_gaze = valid_gaze[valid_gaze != -1].view(-1,2)
                             # AUC: area under curve of ROC
                             multi_hot = imutils.multi_hot_targets(cont_gaze[b_i], imsize[b_i])
-                            scaled_heatmap = imresize(val_gaze_heatmap_pred[b_i], (imsize[b_i][1], imsize[b_i][0]), interp = 'bilinear')
+
+                            ###################### jehoonlee revision ######################
+                            # scaled_heatmap = imresize(val_gaze_heatmap_pred[b_i], (imsize[b_i][1], imsize[b_i][0]), interp = 'bilinear')
+                            # print("(imsize[b_i][1], imsize[b_i][0]): ", (imsize[b_i][1], imsize[b_i][0]))
+                            # print("val_gaze_heatmap_pred[b_i]: ", val_gaze_heatmap_pred[b_i])
+                            tmp1 = imsize[b_i][1].item()
+                            tmp2 = imsize[b_i][0].item()
+                            scaled_heatmap = np.array(Image.fromarray(val_gaze_heatmap_pred[b_i].cpu().detach().numpy()).resize((tmp1, tmp2), Image.BILINEAR))
+
+                            ###################### jehoonlee revision ######################
+
                             auc_score = evaluation.auc(scaled_heatmap, multi_hot)
                             AUC.append(auc_score)
+
+                            ###################### jehoonlee revision ######################
                             # min distance: minimum among all possible pairs of <ground truth point, predicted point>
-                            pred_x, pred_y = evaluation.argmax_pts(val_gaze_heatmap_pred[b_i])
+                            pred_x, pred_y = evaluation.argmax_pts(val_gaze_heatmap_pred[b_i].cpu().detach().numpy())
+                            ###################### jehoonlee revision ######################
+                            
                             norm_p = [pred_x/float(output_resolution), pred_y/float(output_resolution)]
                             all_distances = []
                             for gt_gaze in valid_gaze:
