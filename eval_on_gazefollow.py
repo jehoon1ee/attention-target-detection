@@ -67,6 +67,7 @@ def test():
     with torch.no_grad():
         for val_batch, (val_img, val_face, val_head_channel, val_gaze_heatmap, cont_gaze, imsize, _) in enumerate(val_loader):
             print("\nj: ", j)
+            j += 1
 
             val_images = val_img.cuda().to(device)
             val_head = val_head_channel.cuda().to(device)
@@ -94,6 +95,9 @@ def test():
                 tmp2 = imsize[b_i][0].item()
                 scaled_heatmap = np.array(Image.fromarray(val_gaze_heatmap_pred[b_i].cpu().detach().numpy()).resize((tmp1, tmp2), Image.BILINEAR))
                 ###################### jehoonlee revision ######################
+
+                print("scaled_heatmap: ", scaled_heatmap)
+                print("multi_hot: ", multi_hot)
 
                 auc_score = evaluation.auc(scaled_heatmap, multi_hot)
                 AUC.append(auc_score)
