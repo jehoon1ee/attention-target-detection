@@ -95,7 +95,7 @@ def test():
                 print("scaled_heatmap.shape: ", scaled_heatmap.shape)
                 print("multi_hot.shape: ", multi_hot.shape)
 
-                auc_score = evaluation.auc(scaled_heatmap, multi_hot)
+                auc_score = evaluation.auc(np.transpose(scaled_heatmap), multi_hot)
                 AUC.append(auc_score)
 
                 ###################### jehoonlee revision ######################
