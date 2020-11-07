@@ -86,6 +86,9 @@ def test():
                 # AUC: area under curve of ROC
                 multi_hot = imutils.multi_hot_targets(cont_gaze[b_i], imsize[b_i])
 
+                print("cont_gaze: ", cont_gaze)
+                print("imsize: ", imsize)
+
                 ###################### jehoonlee revision ######################
                 # scaled_heatmap = imresize(val_gaze_heatmap_pred[b_i], (imsize[b_i][1], imsize[b_i][0]), interp = 'bilinear')
                 # print("(imsize[b_i][1], imsize[b_i][0]): ", (imsize[b_i][1], imsize[b_i][0]))
@@ -97,9 +100,9 @@ def test():
 
                 np.set_printoptions(threshold=sys.maxsize)
                 print("scaled_heatmap.shape: ", scaled_heatmap.shape)
-                print("scaled_heatmap: ", scaled_heatmap)
+                # print("scaled_heatmap: ", scaled_heatmap)
                 print("multi_hot.shape: ", multi_hot.shape)
-                print("multi_hot: ", multi_hot)
+                # print("multi_hot: ", multi_hot)
 
                 auc_score = evaluation.auc(scaled_heatmap, multi_hot)
                 AUC.append(auc_score)

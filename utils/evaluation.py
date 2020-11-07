@@ -9,6 +9,7 @@ def auc(heatmap, onehot_im, is_im=True):
         auc_score = roc_auc_score(np.reshape(onehot_im,onehot_im.size), np.reshape(heatmap,heatmap.size))
     else:
         auc_score = roc_auc_score(onehot_im, heatmap)
+    print("auc_score: ", auc_score)
     return auc_score
 
 
