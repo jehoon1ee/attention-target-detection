@@ -92,8 +92,8 @@ def test():
                 scaled_heatmap = np.array(Image.fromarray(val_gaze_heatmap_pred[b_i].cpu().detach().numpy()).resize((tmp1, tmp2), Image.BILINEAR))
                 ###################### jehoonlee revision ######################
 
-                print("scaled_heatmap.shape: ", scaled_heatmap.shape)
-                print("multi_hot.shape: ", multi_hot.shape)
+                # print("scaled_heatmap.shape: ", scaled_heatmap.shape)
+                # print("multi_hot.shape: ", multi_hot.shape)
 
                 auc_score = evaluation.auc(np.transpose(scaled_heatmap), multi_hot)
                 AUC.append(auc_score)
