@@ -99,9 +99,9 @@ def test():
                 ###################### jehoonlee revision ######################
 
                 np.set_printoptions(threshold=sys.maxsize)
-                print("scaled_heatmap.shape: ", scaled_heatmap.shape)
+                # print("scaled_heatmap.shape: ", scaled_heatmap.shape)
                 # print("scaled_heatmap: ", scaled_heatmap)
-                print("multi_hot.shape: ", multi_hot.shape)
+                # print("multi_hot.shape: ", multi_hot.shape)
                 # print("multi_hot: ", multi_hot)
 
                 auc_score = evaluation.auc(scaled_heatmap, multi_hot)
