@@ -24,8 +24,8 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--device", type=int, default=0, help="gpu id")
 parser.add_argument("--init_weights", type=str, default="initial_weights_for_spatial_training.pt", help="initial weights")
 parser.add_argument("--lr", type=float, default=2.5e-4, help="learning rate")
-parser.add_argument("--batch_size", type=int, default=12, help="batch size")
-parser.add_argument("--epochs", type=int, default=3, help="number of epochs")
+parser.add_argument("--batch_size", type=int, default=48, help="batch size")
+parser.add_argument("--epochs", type=int, default=2, help="number of epochs")
 parser.add_argument("--print_every", type=int, default=100, help="print every ___ iterations")
 parser.add_argument("--eval_every", type=int, default=500, help="evaluate every ___ iterations")
 parser.add_argument("--save_every", type=int, default=1, help="save every ___ epochs")
@@ -110,10 +110,10 @@ def train():
             faces = face.cuda().to(device)
             gaze_heatmap = gaze_heatmap.cuda().to(device)
 
-            print("images.shape: ", images.shape)
-            print("head.shape: ", head.shape)
-            print("faces.shape: ", faces.shape)
-            print("gaze_heatmap.shape: ", gaze_heatmap.shape)
+            # print("images.shape: ", images.shape)
+            # print("head.shape: ", head.shape)
+            # print("faces.shape: ", faces.shape)
+            # print("gaze_heatmap.shape: ", gaze_heatmap.shape)
 
             gaze_heatmap_pred, attmap, inout_pred = model(images, head, faces)
             gaze_heatmap_pred = gaze_heatmap_pred.squeeze(1)
@@ -147,7 +147,7 @@ def train():
                 ind = np.random.choice(len(images), replace=False)
                 writer.add_scalar("Train Loss", total_loss, global_step=step)
 
-            if (batch != 0 and batch % args.eval_every == 0) or batch+1 == max_steps:
+            if batch+1 == max_steps:
                 print('Validation in progress ...')
                 model.train(False)
                 AUC = []; min_dist = []; avg_dist = []
@@ -194,10 +194,10 @@ def train():
                     torch.mean(torch.tensor(avg_dist))))
 
                 # Tensorboard
-                val_ind = np.random.choice(len(val_images), replace=False)
-                writer.add_scalar('Validation AUC', torch.mean(torch.tensor(AUC)), global_step=step)
-                writer.add_scalar('Validation min dist', torch.mean(torch.tensor(min_dist)), global_step=step)
-                writer.add_scalar('Validation avg dist', torch.mean(torch.tensor(avg_dist)), global_step=step)
+                # val_ind = np.random.choice(len(val_images), replace=False)
+                # writer.add_scalar('Validation AUC', torch.mean(torch.tensor(AUC)), global_step=step)
+                # writer.add_scalar('Validation min dist', torch.mean(torch.tensor(min_dist)), global_step=step)
+                # writer.add_scalar('Validation avg dist', torch.mean(torch.tensor(avg_dist)), global_step=step)
 
         if ep % args.save_every == 0:
             # save the model
