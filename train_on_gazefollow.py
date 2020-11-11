@@ -76,20 +76,30 @@ def train():
     # Load model
     print("Constructing model")
     model = ModelSpatial()
+    print("point 1")
     model.cuda().to(device)
+    print("point 2")
     if args.init_weights:
         model_dict = model.state_dict()
+        print("point 3")
         pretrained_dict = torch.load(args.init_weights)
+        print("point 4")
         pretrained_dict = pretrained_dict['model']
+        print("point 5")
         model_dict.update(pretrained_dict)
+        print("point 6")
         model.load_state_dict(model_dict)
+        print("point 7")
 
     # Loss functions
     mse_loss = nn.MSELoss(reduce=False) # not reducing in order to ignore outside cases
+    print("point 8")
     bcelogit_loss = nn.BCEWithLogitsLoss()
+    print("point 9")
 
     # Optimizer
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
+    print("point 10")
 
     step = 0
     loss_amp_factor = 10000 # multiplied to the loss to prevent underflow
