@@ -24,7 +24,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--device", type=int, default=0, help="gpu id")
 parser.add_argument("--init_weights", type=str, default="initial_weights_for_spatial_training.pt", help="initial weights")
 parser.add_argument("--lr", type=float, default=2.5e-4, help="learning rate")
-parser.add_argument("--batch_size", type=int, default=48, help="batch size")
+parser.add_argument("--batch_size", type=int, default=12, help="batch size")
 parser.add_argument("--epochs", type=int, default=70, help="number of epochs")
 parser.add_argument("--print_every", type=int, default=100, help="print every ___ iterations")
 parser.add_argument("--eval_every", type=int, default=500, help="evaluate every ___ iterations")
@@ -76,30 +76,20 @@ def train():
     # Load model
     print("Constructing model")
     model = ModelSpatial()
-    print("point 1")
     model.cuda().to(device)
-    print("point 2")
     if args.init_weights:
         model_dict = model.state_dict()
-        print("point 3")
         pretrained_dict = torch.load(args.init_weights)
-        print("point 4")
         pretrained_dict = pretrained_dict['model']
-        print("point 5")
         model_dict.update(pretrained_dict)
-        print("point 6")
         model.load_state_dict(model_dict)
-        print("point 7")
 
     # Loss functions
     mse_loss = nn.MSELoss(reduce=False) # not reducing in order to ignore outside cases
-    print("point 8")
     bcelogit_loss = nn.BCEWithLogitsLoss()
-    print("point 9")
 
     # Optimizer
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
-    print("point 10")
 
     step = 0
     loss_amp_factor = 10000 # multiplied to the loss to prevent underflow
@@ -171,7 +161,7 @@ def train():
                             # print("val_gaze_heatmap_pred[b_i]: ", val_gaze_heatmap_pred[b_i])
                             tmp1 = imsize[b_i][1].item()
                             tmp2 = imsize[b_i][0].item()
-                            scaled_heatmap = np.array(Image.fromarray(val_gaze_heatmap_pred[b_i].cpu().detach().numpy()).resize((tmp1, tmp2), Image.BILINEAR))
+                            scaled_heatmap = np.array(Image.fromarray(val_gaze_heatmap_pred[b_i].cpu().detach().numpy()).resize((tmp2, tmp1), Image.BILINEAR))
 
                             ###################### jehoonlee revision ######################
 
