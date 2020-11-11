@@ -84,7 +84,6 @@ def test():
                 print("val_faces.shape: ", val_faces.shape)
                 print("val_gaze_heatmap.shape: ", val_gaze_heatmap.shape)
                 print("cont_gaze.shape: ", cont_gaze.shape)
-                print("cont_gaze contents: ", cont_gaze)
                 print("imsize.shape: ", imsize.shape)
                 print("val_gaze_heatmap_pred.shape: ", val_gaze_heatmap_pred.shape)
                 print("val_attmap.shape: ", val_attmap.shape)
@@ -104,17 +103,17 @@ def test():
                 multi_hot = imutils.multi_hot_targets(cont_gaze[b_i], imsize[b_i])
                 if (j == 0):
                     print("multi_hot.shape: ", multi_hot.shape)
-
-                # print("cont_gaze: ", cont_gaze[b_i])
-                # print("imsize: ", imsize[b_i])
+                    print("imsize[b_i]: ", imsize[b_i])
 
                 ###################### jehoonlee revision ######################
                 # scaled_heatmap = imresize(val_gaze_heatmap_pred[b_i], (imsize[b_i][1], imsize[b_i][0]), interp = 'bilinear')
-                tmp1 = imsize[b_i][1].item()
-                tmp2 = imsize[b_i][0].item()
-                scaled_heatmap = np.array(Image.fromarray(val_gaze_heatmap_pred[b_i].cpu().detach().numpy()).resize((tmp2, tmp1), Image.BILINEAR))
+                tmp1 = imsize[b_i][0].item()
+                tmp2 = imsize[b_i][1].item()
+                scaled_heatmap = np.array(Image.fromarray(val_gaze_heatmap_pred[b_i].cpu().detach().numpy()).resize((tmp1, tmp2), Image.BILINEAR))
                 ###################### jehoonlee revision ######################
 
+                if (j == 0):
+                    print("scaled_heatmap.shape: ", scaled_heatmap.shape)
                 auc_score = evaluation.auc(scaled_heatmap, multi_hot)
                 AUC.append(auc_score)
 

@@ -61,11 +61,8 @@ class GazeFollow(Dataset):
         if self.test:
             g = self.X_test.get_group(self.keys[index])
             cont_gaze = []
-            print("index: ", index)
             tmp = 0
             for i, row in g.iterrows():
-                print("tmp: ", tmp)
-                tmp += 1
                 path = row['path']
                 x_min = row['bbox_x_min']
                 y_min = row['bbox_y_min']
