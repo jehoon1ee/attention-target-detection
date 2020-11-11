@@ -74,6 +74,12 @@ def test():
             val_head = val_head_channel.cuda().to(device)
             val_faces = val_face.cuda().to(device)
             val_gaze_heatmap = val_gaze_heatmap.cuda().to(device)
+
+            print("val_images.shape: ", val_images.shape)
+            print("val_head.shape: ", val_head.shape)
+            print("val_faces.shape: ", val_faces.shape)
+            print("val_gaze_heatmap.shape: ", val_gaze_heatmap.shape)
+
             val_gaze_heatmap_pred, val_attmap, val_inout_pred = model(val_images, val_head, val_faces)
             val_gaze_heatmap_pred = val_gaze_heatmap_pred.squeeze(1)
 
