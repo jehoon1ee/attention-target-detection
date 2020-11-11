@@ -64,6 +64,7 @@ def draw_labelmap(img, pt, sigma, type='Gaussian'):
     return to_torch(img)
 
 
+# test dataset annotation 기반 gaze target인 픽셀을 1로 만들어 내는 함수
 def multi_hot_targets(gaze_pts, out_res):
     w, h = out_res
     target_map = np.zeros((h, w))

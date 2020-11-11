@@ -105,29 +105,24 @@ def test():
                     print("multi_hot.shape: ", multi_hot.shape)
                     print("imsize[b_i]: ", imsize[b_i])
 
-                ###################### jehoonlee revision ######################
-                # scaled_heatmap = imresize(val_gaze_heatmap_pred[b_i], (imsize[b_i][1], imsize[b_i][0]), interp = 'bilinear')
+                # [1] auc
                 tmp1 = imsize[b_i][0].item()
                 tmp2 = imsize[b_i][1].item()
                 scaled_heatmap = np.array(Image.fromarray(val_gaze_heatmap_pred[b_i].cpu().detach().numpy()).resize((tmp1, tmp2), Image.BILINEAR))
-                ###################### jehoonlee revision ######################
-
                 if (j == 0):
                     print("scaled_heatmap.shape: ", scaled_heatmap.shape)
                 auc_score = evaluation.auc(scaled_heatmap, multi_hot)
                 AUC.append(auc_score)
 
-                ###################### jehoonlee revision ######################
-                # min distance: minimum among all possible pairs of <ground truth point, predicted point>
+                # [2] min distance: minimum among all possible pairs of <ground truth point, predicted point>
                 pred_x, pred_y = evaluation.argmax_pts(val_gaze_heatmap_pred[b_i].cpu().detach().numpy())
-                ###################### jehoonlee revision ######################
-
                 norm_p = [pred_x/float(output_resolution), pred_y/float(output_resolution)]
                 all_distances = []
                 for gt_gaze in valid_gaze:
                     all_distances.append(evaluation.L2_dist(gt_gaze, norm_p))
                 min_dist.append(min(all_distances))
-                # average distance: distance between the predicted point and human average point
+
+                # [3] average distance: distance between the predicted point and human average point
                 mean_gt_gaze = torch.mean(valid_gaze, 0)
                 avg_distance = evaluation.L2_dist(mean_gt_gaze, norm_p)
                 avg_dist.append(avg_distance)
