@@ -74,14 +74,17 @@ def test():
             val_faces = val_face.cuda().to(device)
             val_gaze_heatmap = val_gaze_heatmap.cuda().to(device)
 
+            val_gaze_heatmap_pred, val_attmap, val_inout_pred = model(val_images, val_head, val_faces)
+            val_gaze_heatmap_pred = val_gaze_heatmap_pred.squeeze(1)
+
             if (j == 0):
                 print("val_images.shape: ", val_images.shape)
                 print("val_head.shape: ", val_head.shape)
                 print("val_faces.shape: ", val_faces.shape)
                 print("val_gaze_heatmap.shape: ", val_gaze_heatmap.shape)
-
-            val_gaze_heatmap_pred, val_attmap, val_inout_pred = model(val_images, val_head, val_faces)
-            val_gaze_heatmap_pred = val_gaze_heatmap_pred.squeeze(1)
+                print("val_gaze_heatmap_pred.shape: ", val_gaze_heatmap_pred.shape)
+                print("val_attmap.shape: ", val_attmap.shape)
+                print("val_inout_pred: ", val_inout_pred)
 
             # go through each data point and record AUC, min dist, avg dist
             for b_i in range(len(cont_gaze)):
@@ -103,18 +106,10 @@ def test():
 
                 ###################### jehoonlee revision ######################
                 # scaled_heatmap = imresize(val_gaze_heatmap_pred[b_i], (imsize[b_i][1], imsize[b_i][0]), interp = 'bilinear')
-                # print("(imsize[b_i][1], imsize[b_i][0]): ", (imsize[b_i][1], imsize[b_i][0]))
-                # print("val_gaze_heatmap_pred[b_i]: ", val_gaze_heatmap_pred[b_i])
                 tmp1 = imsize[b_i][1].item()
                 tmp2 = imsize[b_i][0].item()
                 scaled_heatmap = np.array(Image.fromarray(val_gaze_heatmap_pred[b_i].cpu().detach().numpy()).resize((tmp2, tmp1), Image.BILINEAR))
                 ###################### jehoonlee revision ######################
-
-                np.set_printoptions(threshold=sys.maxsize)
-                # print("scaled_heatmap.shape: ", scaled_heatmap.shape)
-                # print("scaled_heatmap: ", scaled_heatmap)
-                # print("multi_hot.shape: ", multi_hot.shape)
-                # print("multi_hot: ", multi_hot)
 
                 auc_score = evaluation.auc(scaled_heatmap, multi_hot)
                 AUC.append(auc_score)
