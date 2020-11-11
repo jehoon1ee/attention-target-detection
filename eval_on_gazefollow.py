@@ -75,10 +75,11 @@ def test():
             val_faces = val_face.cuda().to(device)
             val_gaze_heatmap = val_gaze_heatmap.cuda().to(device)
 
-            print("val_images.shape: ", val_images.shape)
-            print("val_head.shape: ", val_head.shape)
-            print("val_faces.shape: ", val_faces.shape)
-            print("val_gaze_heatmap.shape: ", val_gaze_heatmap.shape)
+            if (j == 0):
+                print("val_images.shape: ", val_images.shape)
+                print("val_head.shape: ", val_head.shape)
+                print("val_faces.shape: ", val_faces.shape)
+                print("val_gaze_heatmap.shape: ", val_gaze_heatmap.shape)
 
             val_gaze_heatmap_pred, val_attmap, val_inout_pred = model(val_images, val_head, val_faces)
             val_gaze_heatmap_pred = val_gaze_heatmap_pred.squeeze(1)
@@ -88,9 +89,15 @@ def test():
 
                 # remove padding and recover valid ground truth points
                 valid_gaze = cont_gaze[b_i]
+                if (j == 0):
+                    print("before view() valid_gaze.shape: ", valid_gaze.shape)
                 valid_gaze = valid_gaze[valid_gaze != -1].view(-1,2)
+                if (j == 0):
+                    print("after view() valid_gaze.shape: ", valid_gaze.shape)
                 # AUC: area under curve of ROC
                 multi_hot = imutils.multi_hot_targets(cont_gaze[b_i], imsize[b_i])
+                if (j == 0):
+                    print("multi_hot.shape: ", multi_hot.shape)
 
                 # print("cont_gaze: ", cont_gaze[b_i])
                 # print("imsize: ", imsize[b_i])
