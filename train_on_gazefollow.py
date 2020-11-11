@@ -24,8 +24,8 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--device", type=int, default=0, help="gpu id")
 parser.add_argument("--init_weights", type=str, default="initial_weights_for_spatial_training.pt", help="initial weights")
 parser.add_argument("--lr", type=float, default=2.5e-4, help="learning rate")
-parser.add_argument("--batch_size", type=int, default=3, help="batch size")
-parser.add_argument("--epochs", type=int, default=70, help="number of epochs")
+parser.add_argument("--batch_size", type=int, default=12, help="batch size")
+parser.add_argument("--epochs", type=int, default=3, help="number of epochs")
 parser.add_argument("--print_every", type=int, default=100, help="print every ___ iterations")
 parser.add_argument("--eval_every", type=int, default=500, help="evaluate every ___ iterations")
 parser.add_argument("--save_every", type=int, default=1, help="save every ___ epochs")
@@ -119,19 +119,21 @@ def train():
             gaze_heatmap_pred = gaze_heatmap_pred.squeeze(1)
 
             # Loss
-                # l2 loss computed only for inside case
-            l2_loss = mse_loss(gaze_heatmap_pred, gaze_heatmap)*loss_amp_factor
+            # [1] l2 loss computed only for inside case
+            l2_loss = mse_loss(gaze_heatmap_pred, gaze_heatmap) * loss_amp_factor
             l2_loss = torch.mean(l2_loss, dim=1)
             l2_loss = torch.mean(l2_loss, dim=1)
+
             gaze_inside = gaze_inside.cuda(device).to(torch.float)
             l2_loss = torch.mul(l2_loss, gaze_inside) # zero out loss when it's out-of-frame gaze case
-            l2_loss = torch.sum(l2_loss)/torch.sum(gaze_inside)
-                # cross entropy loss for in vs out
+            l2_loss = torch.sum(l2_loss) / torch.sum(gaze_inside)
+
+            # [2] cross entropy loss for in vs out
             Xent_loss = bcelogit_loss(inout_pred.squeeze(), gaze_inside.squeeze())*100
 
-            total_loss = l2_loss #+ Xent_loss
+            total_loss = l2_loss + Xent_loss
             # NOTE: summed loss is used to train the main model.
-            #       l2_loss is used to get SOTA on GazeFollow benchmark.
+            # l2_loss is used to get SOTA on GazeFollow benchmark.
             total_loss.backward() # loss accumulation
 
             optimizer.step()
@@ -166,38 +168,30 @@ def train():
                             # AUC: area under curve of ROC
                             multi_hot = imutils.multi_hot_targets(cont_gaze[b_i], imsize[b_i])
 
-                            ###################### jehoonlee revision ######################
-                            # scaled_heatmap = imresize(val_gaze_heatmap_pred[b_i], (imsize[b_i][1], imsize[b_i][0]), interp = 'bilinear')
-                            # print("(imsize[b_i][1], imsize[b_i][0]): ", (imsize[b_i][1], imsize[b_i][0]))
-                            # print("val_gaze_heatmap_pred[b_i]: ", val_gaze_heatmap_pred[b_i])
-                            tmp1 = imsize[b_i][1].item()
-                            tmp2 = imsize[b_i][0].item()
-                            scaled_heatmap = np.array(Image.fromarray(val_gaze_heatmap_pred[b_i].cpu().detach().numpy()).resize((tmp2, tmp1), Image.BILINEAR))
-
-                            ###################### jehoonlee revision ######################
-
+                            # [1] auc
+                            tmp1 = imsize[b_i][0].item()
+                            tmp2 = imsize[b_i][1].item()
+                            scaled_heatmap = np.array(Image.fromarray(val_gaze_heatmap_pred[b_i].cpu().detach().numpy()).resize((tmp1, tmp2), Image.BILINEAR))
                             auc_score = evaluation.auc(scaled_heatmap, multi_hot)
                             AUC.append(auc_score)
 
-                            ###################### jehoonlee revision ######################
-                            # min distance: minimum among all possible pairs of <ground truth point, predicted point>
+                            # [2] min distance: minimum among all possible pairs of <ground truth point, predicted point>
                             pred_x, pred_y = evaluation.argmax_pts(val_gaze_heatmap_pred[b_i].cpu().detach().numpy())
-                            ###################### jehoonlee revision ######################
-
                             norm_p = [pred_x/float(output_resolution), pred_y/float(output_resolution)]
                             all_distances = []
                             for gt_gaze in valid_gaze:
                                 all_distances.append(evaluation.L2_dist(gt_gaze, norm_p))
                             min_dist.append(min(all_distances))
-                            # average distance: distance between the predicted point and human average point
+
+                            # [3] average distance: distance between the predicted point and human average point
                             mean_gt_gaze = torch.mean(valid_gaze, 0)
                             avg_distance = evaluation.L2_dist(mean_gt_gaze, norm_p)
                             avg_dist.append(avg_distance)
 
                 print("\tAUC:{:.4f}\tmin dist:{:.4f}\tavg dist:{:.4f}".format(
-                      torch.mean(torch.tensor(AUC)),
-                      torch.mean(torch.tensor(min_dist)),
-                      torch.mean(torch.tensor(avg_dist))))
+                    torch.mean(torch.tensor(AUC)),
+                    torch.mean(torch.tensor(min_dist)),
+                    torch.mean(torch.tensor(avg_dist))))
 
                 # Tensorboard
                 val_ind = np.random.choice(len(val_images), replace=False)
