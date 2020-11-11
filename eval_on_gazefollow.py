@@ -70,8 +70,8 @@ def test():
             print("batch: ", j)
 
             val_images = val_img.cuda().to(device)
-            val_head = val_head_channel.cuda().to(device)
             val_faces = val_face.cuda().to(device)
+            val_head = val_head_channel.cuda().to(device)
             val_gaze_heatmap = val_gaze_heatmap.cuda().to(device)
 
             val_gaze_heatmap_pred, val_attmap, val_inout_pred = model(val_images, val_head, val_faces)
@@ -82,9 +82,11 @@ def test():
                 print("val_head.shape: ", val_head.shape)
                 print("val_faces.shape: ", val_faces.shape)
                 print("val_gaze_heatmap.shape: ", val_gaze_heatmap.shape)
+                print("cont_gaze.shape: ", cont_gaze.shape)
+                print("imsize.shape: ", imsize.shape)
                 print("val_gaze_heatmap_pred.shape: ", val_gaze_heatmap_pred.shape)
                 print("val_attmap.shape: ", val_attmap.shape)
-                print("val_inout_pred: ", val_inout_pred)
+                print("val_inout_pred.shape: ", val_inout_pred.shape)
 
             # go through each data point and record AUC, min dist, avg dist
             for b_i in range(len(cont_gaze)):
