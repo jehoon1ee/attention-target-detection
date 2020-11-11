@@ -24,7 +24,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--device", type=int, default=0, help="gpu id")
 parser.add_argument("--init_weights", type=str, default="initial_weights_for_spatial_training.pt", help="initial weights")
 parser.add_argument("--lr", type=float, default=2.5e-4, help="learning rate")
-parser.add_argument("--batch_size", type=int, default=12, help="batch size")
+parser.add_argument("--batch_size", type=int, default=3, help="batch size")
 parser.add_argument("--epochs", type=int, default=70, help="number of epochs")
 parser.add_argument("--print_every", type=int, default=100, help="print every ___ iterations")
 parser.add_argument("--eval_every", type=int, default=500, help="evaluate every ___ iterations")
@@ -96,14 +96,25 @@ def train():
     max_steps = len(train_loader)
     optimizer.zero_grad()
 
+    j = 0
+
     print("Training in progress ...")
     for ep in range(args.epochs):
         for batch, (img, face, head_channel, gaze_heatmap, name, gaze_inside) in enumerate(train_loader):
+            print("batch: ", j)
+            j += 1
+
             model.train(True)
             images = img.cuda().to(device)
             head = head_channel.cuda().to(device)
             faces = face.cuda().to(device)
             gaze_heatmap = gaze_heatmap.cuda().to(device)
+
+            print("images.shape: ", images.shape)
+            print("head.shape: ", head.shape)
+            print("faces.shape: ", faces.shape)
+            print("gaze_heatmap.shape: ", gaze_heatmap.shape)
+
             gaze_heatmap_pred, attmap, inout_pred = model(images, head, faces)
             gaze_heatmap_pred = gaze_heatmap_pred.squeeze(1)
 
