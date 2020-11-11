@@ -62,6 +62,7 @@ def test():
     model.train(False)
     AUC = []; min_dist = []; avg_dist = []
 
+    numpy.set_printoptions(threshold=sys.maxsize)
     i = 0
     j = 0
 
@@ -83,6 +84,7 @@ def test():
                 print("val_faces.shape: ", val_faces.shape)
                 print("val_gaze_heatmap.shape: ", val_gaze_heatmap.shape)
                 print("cont_gaze.shape: ", cont_gaze.shape)
+                print("cont_gaze contents: ", cont_gaze)
                 print("imsize.shape: ", imsize.shape)
                 print("val_gaze_heatmap_pred.shape: ", val_gaze_heatmap_pred.shape)
                 print("val_attmap.shape: ", val_attmap.shape)
