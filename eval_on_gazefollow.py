@@ -62,7 +62,7 @@ def test():
     model.train(False)
     AUC = []; min_dist = []; avg_dist = []
 
-    numpy.set_printoptions(threshold=sys.maxsize)
+    np.set_printoptions(threshold=sys.maxsize)
     i = 0
     j = 0
 
