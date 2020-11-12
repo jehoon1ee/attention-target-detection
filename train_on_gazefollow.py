@@ -131,10 +131,13 @@ def train():
 
             gaze_inside = gaze_inside.cuda(device).to(torch.float)
             print("gaze_inside.shape: ", gaze_inside.shape)
+            print("gaze_inside: ", gaze_inside)
             l2_loss = torch.mul(l2_loss, gaze_inside) # zero out loss when it's out-of-frame gaze case
             l2_loss = torch.sum(l2_loss) / torch.sum(gaze_inside)
+            print("[4] l2_loss.shape: ", l2_loss.shape)
 
             # [2] cross entropy loss for in vs out
+            print("inout_pred: ", inout_pred)
             Xent_loss = bcelogit_loss(inout_pred.squeeze(), gaze_inside.squeeze())*100
 
             total_loss = l2_loss + Xent_loss
