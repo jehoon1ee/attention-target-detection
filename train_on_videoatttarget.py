@@ -22,7 +22,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--device", type=int, default=0, help="gpu id")
 parser.add_argument("--init_weights", type=str, default='initial_weights_for_temporal_training.pt', help="initial weights")
 parser.add_argument("--lr", type=float, default=5e-5, help="learning rate")
-parser.add_argument("--batch_size", type=int, default=16, help="batch size")
+parser.add_argument("--batch_size", type=int, default=2, help="batch size")
 parser.add_argument("--chunk_size", type=int, default=3, help="update every ___ frames")
 parser.add_argument("--epochs", type=int, default=3, help="max number of epochs")
 parser.add_argument("--save_every", type=int, default=1, help="save every ___ epochs")
@@ -103,13 +103,13 @@ def train():
             # freeze batchnorm layers
             for module in model.modules():
                 if isinstance(module, torch.nn.modules.BatchNorm1d):
-                    print("BachNorm1d eval..")
+                    # print("BachNorm1d eval..")
                     module.eval()
                 if isinstance(module, torch.nn.modules.BatchNorm2d):
-                    print("BachNorm2d eval..")
+                    # print("BachNorm2d eval..")
                     module.eval()
                 if isinstance(module, torch.nn.modules.BatchNorm3d):
-                    print("BachNorm3d eval..")
+                    # print("BachNorm3d eval..")
                     module.eval()
 
             print("img.shape: ", img.shape)
@@ -189,6 +189,13 @@ def video_pack_sequences(in_batch):
 
     # Get the number of return values from __getitem__ in the Dataset
     num_returns = len(in_batch[0])
+    print("num_returns: ", num_returns)
+    print("in_batch[0][0].shape: ", in_batch[0][0].shape)
+    print("in_batch[0][1].shape: ", in_batch[0][1].shape)
+    print("in_batch[0][2].shape: ", in_batch[0][2].shape)
+    print("in_batch[0][3].shape: ", in_batch[0][3].shape)
+    print("in_batch[0][4].shape: ", in_batch[0][4].shape)
+
     print("in_batch[1][0].shape: ", in_batch[1][0].shape)
     print("in_batch[1][1].shape: ", in_batch[1][1].shape)
     print("in_batch[1][2].shape: ", in_batch[1][2].shape)
