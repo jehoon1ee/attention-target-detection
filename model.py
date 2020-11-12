@@ -460,7 +460,6 @@ class ModelSpatioTemporal(nn.Module):
 
             if (batch_sizes_len >= 2) and (batch_sizes[1] > 0):
                 tmp_2 = encoding[0+batch_sizes[0]:0+batch_sizes[0]+batch_sizes[1]]
-                tmp_4 = torch.stack([tmp_1, tmp_2], dim = 0)
                 if (batch_sizes[1] == 1):
                     row_1 = row_1 + 1
                 elif (batch_sizes[1] == 2):
@@ -469,7 +468,6 @@ class ModelSpatioTemporal(nn.Module):
 
                 if (batch_sizes_len >= 3) and (batch_sizes[2] > 0):
                     tmp_3 = encoding[0+batch_sizes[0]+batch_sizes[1]:]
-                    tmp_4 = torch.stack([tmp_4, tmp_3], dim = 0)
                     if (batch_sizes[2] == 1):
                         row_1 = row_1 + 1
                     elif (batch_sizes[2] == 2):
@@ -479,7 +477,14 @@ class ModelSpatioTemporal(nn.Module):
         # print("tmp_1.shape: ", tmp_1.shape)
         # print("tmp_2.shape: ", tmp_2.shape)
         # print("tmp_3.shape: ", tmp_3.shape)
-        # tmp_4 = torch.stack([tmp_1, tmp_2, tmp_3], dim = 0)
+
+        if (batch_sizes_len == 1):
+            tmp_4 = tmp_1
+        elif (batch_sizes_len == 2):
+            tmp_4 = torch.stack([tmp_1, tmp_2], dim = 0)
+        elif (batch_sizes_len == 3):
+            tmp_4 = torch.stack([tmp_1, tmp_2, tmp_3], dim = 0)
+
         print("tmp_4.shape: ", tmp_4.shape)
         tmp_5 = torch.transpose(tmp_4, 0, 1)
         print("tmp_5.shape: ", tmp_5.shape)
