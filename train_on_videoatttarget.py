@@ -119,20 +119,20 @@ def train():
             print("inout_label.shape: ", inout_label.shape)
             print("lengths: ", lengths)
 
-            tmp_1 = pack_padded_sequence(img, lengths, batch_first=True)
+            tmp_1 = pack_padded_sequence(img, lengths, batch_first=False)
             X_pad_data_img = tmp_1.data
             X_pad_sizes = tmp_1.batch_sizes
 
-            tmp_2 = pack_padded_sequence(head_channel, lengths, batch_first=True)
+            tmp_2 = pack_padded_sequence(head_channel, lengths, batch_first=False)
             X_pad_data_head = tmp_2.data
 
-            tmp_3 = pack_padded_sequence(face, lengths, batch_first=True)
+            tmp_3 = pack_padded_sequence(face, lengths, batch_first=False)
             X_pad_data_face = tmp_3.data
 
-            tmp_4 = pack_padded_sequence(gaze_heatmap, lengths, batch_first=True)
+            tmp_4 = pack_padded_sequence(gaze_heatmap, lengths, batch_first=False)
             Y_pad_data_heatmap = tmp_4.data
 
-            tmp_5 = pack_padded_sequence(inout_label, lengths, batch_first=True)
+            tmp_5 = pack_padded_sequence(inout_label, lengths, batch_first=False)
             Y_pad_data_inout = tmp_5.data
 
             print("tmp_1.batch_sizes: ", tmp_1.batch_sizes)
