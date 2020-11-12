@@ -143,7 +143,8 @@ def train():
 
             hx = (torch.zeros((num_lstm_layers, args.batch_size, 512, 7, 7)).cuda(device),
                   torch.zeros((num_lstm_layers, args.batch_size, 512, 7, 7)).cuda(device)) # (num_layers, batch_size, feature dims)
-            print("hx.shape: ", hx.shape)
+            print("hx[0].shape: ", hx[1].shape)
+            print("hx[1].shape: ", hx[1].shape)
             last_index = 0
             previous_hx_size = args.batch_size
 
@@ -152,6 +153,10 @@ def train():
                 # we step forward N = chunk_size frames
                 X_pad_sizes_slice = X_pad_sizes[i:i + args.chunk_size].cuda(device)
                 curr_length = np.sum(X_pad_sizes_slice.cpu().detach().numpy())
+
+                print("X_pad_sizes_slice: ", X_pad_sizes_slice)
+                print("curr_length: ", curr_length)
+
                 # slice padded data
                 X_pad_data_slice_img = X_pad_data_img[last_index:last_index + curr_length].cuda(device)
                 X_pad_data_slice_head = X_pad_data_head[last_index:last_index + curr_length].cuda(device)
