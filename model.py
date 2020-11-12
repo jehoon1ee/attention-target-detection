@@ -450,7 +450,8 @@ class ModelSpatioTemporal(nn.Module):
         print("tmp_1.shape: ", tmp_1.shape)
         print("tmp_2.shape: ", tmp_2.shape)
         print("tmp_3.shape: ", tmp_3.shape)
-
+        tmp_4 = torch.stack(tmp_1, tmp_2, tmp_3, dim = 0)
+        print("tmp_4.shape: ", tmp_4.shape)
 
         print("x_unpack.size(): ", x_unpack.size())
         print("x_unpack_lengths: ", x_unpack_lengths)
