@@ -108,6 +108,13 @@ def train():
                 if isinstance(module, torch.nn.modules.BatchNorm3d):
                     module.eval()
 
+            print("img.shape: ", image.shape)
+            print("face.shape: ", face.shape)
+            print("head_channel.shape: ", head_channel.shape)
+            print("gaze_heatmap.shape: ", gaze_heatmap.shape)
+            print("inout_label.shape: ", inout_label.shape)
+            print("lengths: ", lengths)
+
             X_pad_data_img, X_pad_sizes = pack_padded_sequence(img, lengths, batch_first=True)
             X_pad_data_head, _ = pack_padded_sequence(head_channel, lengths, batch_first=True)
             X_pad_data_face, _ = pack_padded_sequence(face, lengths, batch_first=True)
