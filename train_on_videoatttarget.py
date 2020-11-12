@@ -119,20 +119,20 @@ def train():
             print("inout_label.shape: ", inout_label.shape)
             print("lengths: ", lengths)
 
-            tmp_1 = pack_padded_sequence(img, lengths, batch_first=False)
+            tmp_1 = pack_padded_sequence(img, lengths, batch_first=True)
             X_pad_data_img = tmp_1.data
             X_pad_sizes = tmp_1.batch_sizes
 
-            tmp_2 = pack_padded_sequence(head_channel, lengths, batch_first=False)
+            tmp_2 = pack_padded_sequence(head_channel, lengths, batch_first=True)
             X_pad_data_head = tmp_2.data
 
-            tmp_3 = pack_padded_sequence(face, lengths, batch_first=False)
+            tmp_3 = pack_padded_sequence(face, lengths, batch_first=True)
             X_pad_data_face = tmp_3.data
 
-            tmp_4 = pack_padded_sequence(gaze_heatmap, lengths, batch_first=False)
+            tmp_4 = pack_padded_sequence(gaze_heatmap, lengths, batch_first=True)
             Y_pad_data_heatmap = tmp_4.data
 
-            tmp_5 = pack_padded_sequence(inout_label, lengths, batch_first=False)
+            tmp_5 = pack_padded_sequence(inout_label, lengths, batch_first=True)
             Y_pad_data_inout = tmp_5.data
 
             print("tmp_1.batch_sizes: ", tmp_1.batch_sizes)
@@ -143,6 +143,7 @@ def train():
 
             hx = (torch.zeros((num_lstm_layers, args.batch_size, 512, 7, 7)).cuda(device),
                   torch.zeros((num_lstm_layers, args.batch_size, 512, 7, 7)).cuda(device)) # (num_layers, batch_size, feature dims)
+            print("hx.shape: ", hx.shape)
             last_index = 0
             previous_hx_size = args.batch_size
 
