@@ -486,7 +486,8 @@ class ModelSpatioTemporal(nn.Module):
             tmp_4 = torch.stack([tmp_1, tmp_2, tmp_3], dim = 1)
 
         print("tmp_4.shape: ", tmp_4.shape)
-        tmp_5 = torch.transpose(tmp_4, 0, 1)
+        # tmp_5 = torch.transpose(tmp_4, 0, 1)
+        tmp_5 = tmp_4
         print("tmp_5.shape: ", tmp_5.shape)
         x_pad = pack_padded_sequence(tmp_5, [row_1, row_2], batch_first=True)
 
