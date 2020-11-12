@@ -438,14 +438,23 @@ class ModelSpatioTemporal(nn.Module):
         encoding = self.relu(encoding)
         print("encoding shape: ", encoding.shape)
 
-        encoding = torch.unsqueeze(encoding, 0)
-        print("encoding shape: ", encoding.shape)
-
         # RW edit: x should be of shape (size, channel, width, height)
         # x_pad = PackedSequence(encoding, batch_sizes)
-        x_pad = pack_padded_sequence(encoding, bach_sizes.cpu(), batch_first=True)
-        print("len(x_pad): ", len(x_pad))
-        print("type(x_pad): ", type(x_pad))
+        # x_pad = pack_padded_sequence(encoding, bach_sizes.cpu(), batch_first=True)
+        # print("len(x_pad): ", len(x_pad))
+        # print("type(x_pad): ", type(x_pad))
+
+        tmp_1 = encoding[0:1]
+        tmp_2 = encoding[2:3]
+        tmp_3 = encoding[4:5]
+        print("tmp_1.shape: ", tmp_1.shape)
+        print("tmp_2.shape: ", tmp_2.shape)
+        print("tmp_3.shape: ", tmp_3.shape)
+
+
+        print("x_unpack.size(): ", x_unpack.size())
+        print("x_unpack_lengths: ", x_unpack_lengths)
+
         y, hx = self.convlstm_scene(x_pad, hx=hidden_scene)
         deconv = y.data
 
