@@ -464,7 +464,7 @@ class ModelSpatioTemporal(nn.Module):
                     row_1 = row_1 + 1
                     row_2 = row_2 + 1
 
-                if (batch_sizes[2] > 0);
+                if (batch_sizes[2] > 0):
                     tmp_3 = encoding[0+batch_sizes[0]+batch_sizes[1]:]
                     if (batch_sizes[2] == 1):
                         row_1 = row_1 + 1
