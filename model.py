@@ -451,26 +451,26 @@ class ModelSpatioTemporal(nn.Module):
             tmp_1 = encoding[0:0+batch_sizes[0]]
 
             if (batch_sizes[0] == 1):
-                row_1++
+                row_1 = row_1 + 1
             elif (batch_sizes[0] == 2):
-                row_1++
-                row_2++
+                row_1 = row_1 + 1
+                row_2 = row_2 + 1
 
             if (batch_sizes[1] > 0):
                 tmp_2 = encoding[0+batch_sizes[0]:0+batch_sizes[0]+batch_sizes[1]]
                 if (batch_sizes[1] == 1):
-                    row_1++
+                    row_1 = row_1 + 1
                 elif (batch_sizes[1] == 2):
-                    row_1++
-                    row_2++
+                    row_1 = row_1 + 1
+                    row_2 = row_2 + 1
 
                 if (batch_sizes[2] > 0);
                     tmp_3 = encoding[0+batch_sizes[0]+batch_sizes[1]:]
                     if (batch_sizes[2] == 1):
-                        row_1++
+                        row_1 = row_1 + 1
                     elif (batch_sizes[2] == 2):
-                        row_1++
-                        row_2++
+                        row_1 = row_1 + 1
+                        row_2 = row_2 + 1
 
         print("tmp_1.shape: ", tmp_1.shape)
         print("tmp_2.shape: ", tmp_2.shape)
