@@ -134,7 +134,7 @@ def train():
             print("gaze_inside: ", gaze_inside)
             l2_loss = torch.mul(l2_loss, gaze_inside) # zero out loss when it's out-of-frame gaze case
             l2_loss = torch.sum(l2_loss) / torch.sum(gaze_inside)
-            print("[4] l2_loss.shape: ", l2_loss.shape)
+            print("[4] l2_loss: ", l2_loss)
 
             # [2] cross entropy loss for in vs out
             print("inout_pred: ", inout_pred)
