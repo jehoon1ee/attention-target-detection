@@ -114,6 +114,9 @@ class ConvNdRNNBase(torch.nn.Module):
         else:
             mini_batch = input.size(0) if self.batch_first else input.size(1)
 
+        print("is_input_packed: ", is_input_packed)
+        print("mini_batch: ", mini_batch)
+
         num_directions = 2 if self.bidirectional else 1
         expected_hidden_size = (self.num_layers * num_directions,
                                 mini_batch, self.out_channels) + input.shape[ch_dim + 1:]
