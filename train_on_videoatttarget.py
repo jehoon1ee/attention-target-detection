@@ -189,11 +189,11 @@ def video_pack_sequences(in_batch):
 
     # Get the number of return values from __getitem__ in the Dataset
     num_returns = len(in_batch[0])
-    print("in_batch[0]: ", in_batch[0])
-    print("in_batch[1].shape: ", in_batch[1].shape)
-    print("in_batch[2].shape: ", in_batch[2].shape)
-    print("in_batch[3].shape: ", in_batch[3].shape)
-    print("in_batch[4].shape: ", in_bach[4].shape)
+    print("in_batch[1][0].shape: ", in_batch[1][0].shape)
+    print("in_batch[1][1].shape: ", in_batch[1][1].shape)
+    print("in_batch[1][2].shape: ", in_batch[1][2].shape)
+    print("in_batch[1][3].shape: ", in_batch[1][3].shape)
+    print("in_batch[1][4].shape: ", in_batch[1][4].shape)
 
     # Sort the batch according to the sequence lengths. This is needed by torch func: pack_padded_sequences
     in_batch.sort(key=lambda x: -x[0].shape[0])
