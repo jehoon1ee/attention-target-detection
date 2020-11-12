@@ -189,7 +189,7 @@ def video_pack_sequences(in_batch):
 
     # Get the number of return values from __getitem__ in the Dataset
     num_returns = len(in_batch[0])
-    print("in_batch[0].shape: ", in_batch[0].shape)
+    print("in_batch[0]: ", in_batch[0])
     print("in_batch[1].shape: ", in_batch[1].shape)
     print("in_batch[2].shape: ", in_batch[2].shape)
     print("in_batch[3].shape: ", in_batch[3].shape)
