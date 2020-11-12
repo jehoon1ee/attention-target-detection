@@ -241,6 +241,11 @@ class VideoAttTarget_video(Dataset):
         clip = sequence_path.split('/')[-2]
         seq_len = len(df.index)
 
+        print("index: ", index)
+        print("show_name: ", show_name)
+        print("clip: ", clip)
+        print("seq_len: ", seq_len)
+
         # moving-avg smoothing
         window_size = 11 # should be odd number
         df['xmin'] = myutils.smooth_by_conv(window_size, df, 'xmin')
