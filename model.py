@@ -440,7 +440,7 @@ class ModelSpatioTemporal(nn.Module):
 
         # RW edit: x should be of shape (size, channel, width, height)
         # x_pad = PackedSequence(encoding, batch_sizes)
-        x_pad = pack_padded_sequence(encoding, batch_sizes.cpu(), batch_first=True)
+        x_pad = pack_padded_sequence(encoding, [512, 512, 512], batch_first=True)
         print("len(x_pad): ", len(x_pad))
         print("type(x_pad): ", type(x_pad))
         y, hx = self.convlstm_scene(x_pad, hx=hidden_scene)
