@@ -25,9 +25,9 @@ parser.add_argument("--device", type=int, default=0, help="gpu id")
 parser.add_argument("--init_weights", type=str, default="initial_weights_for_spatial_training.pt", help="initial weights")
 parser.add_argument("--lr", type=float, default=2.5e-4, help="learning rate")
 parser.add_argument("--batch_size", type=int, default=48, help="batch size")
-parser.add_argument("--epochs", type=int, default=2, help="number of epochs")
+parser.add_argument("--epochs", type=int, default=1, help="number of epochs")
 parser.add_argument("--print_every", type=int, default=100, help="print every ___ iterations")
-parser.add_argument("--eval_every", type=int, default=500, help="evaluate every ___ iterations")
+parser.add_argument("--eval_every", type=int, default=1000, help="evaluate every ___ iterations")
 parser.add_argument("--save_every", type=int, default=1, help="save every ___ epochs")
 parser.add_argument("--log_dir", type=str, default="logs", help="directory to save log files")
 args = parser.parse_args()
@@ -61,8 +61,7 @@ def train():
                                                num_workers=0)
 
     # Set up log dir
-    logdir = os.path.join(args.log_dir,
-                          datetime.now().strftime('%Y-%m-%d_%H-%M-%S'))
+    logdir = os.path.join(args.log_dir, datetime.now().strftime('%Y-%m-%d_%H-%M-%S'))
     if os.path.exists(logdir):
         shutil.rmtree(logdir)
     os.makedirs(logdir)
@@ -78,6 +77,7 @@ def train():
     model = ModelSpatial()
     model.cuda().to(device)
     if args.init_weights:
+        print("Initializing weights")
         model_dict = model.state_dict()
         pretrained_dict = torch.load(args.init_weights)
         pretrained_dict = pretrained_dict['model']
