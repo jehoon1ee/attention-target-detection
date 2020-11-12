@@ -118,13 +118,19 @@ def train():
             gaze_heatmap_pred, attmap, inout_pred = model(images, head, faces)
             gaze_heatmap_pred = gaze_heatmap_pred.squeeze(1)
 
-            # Loss
-            # [1] l2 loss computed only for inside case
+            # [1] L2 loss computed only for inside case
+            print("\n")
+            print("gaze_heatmap_pred.shape: ", gaze_heatmap_pred.shape)
+            print("gaze_heatmap.shape: ", gaze_heatmap.shape)
             l2_loss = mse_loss(gaze_heatmap_pred, gaze_heatmap) * loss_amp_factor
+            print("[1] l2_loss.shape: ", l2_loss.shape)
             l2_loss = torch.mean(l2_loss, dim=1)
-            l2_loss = torch.mean(l2_loss, dim=1)
+            print("[2] l2_loss.shape: ", l2_loss.shape)
+            l2_loss = torch.mean(l2_loss, dim=1) # why twice?
+            print("[3] l2_loss.shape: ", l2_loss.shape)
 
             gaze_inside = gaze_inside.cuda(device).to(torch.float)
+            print("gaze_inside.shape: ", gaze_inside.shape)
             l2_loss = torch.mul(l2_loss, gaze_inside) # zero out loss when it's out-of-frame gaze case
             l2_loss = torch.sum(l2_loss) / torch.sum(gaze_inside)
 
