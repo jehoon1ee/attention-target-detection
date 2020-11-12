@@ -119,11 +119,27 @@ def train():
             print("inout_label.shape: ", inout_label.shape)
             print("lengths: ", lengths)
 
-            X_pad_data_img, X_pad_sizes = pack_padded_sequence(img, lengths, batch_first=True)
-            X_pad_data_head, _ = pack_padded_sequence(head_channel, lengths, batch_first=True)
-            X_pad_data_face, _ = pack_padded_sequence(face, lengths, batch_first=True)
-            Y_pad_data_heatmap, _ = pack_padded_sequence(gaze_heatmap, lengths, batch_first=True)
-            Y_pad_data_inout, _ = pack_padded_sequence(inout_label, lengths, batch_first=True)
+            tmp_1 = pack_padded_sequence(img, lengths, batch_first=True)
+            X_pad_data_img = tmp_1.data
+            X_pad_sizes = tmp_1.batch_sizes
+
+            tmp_2 = pack_padded_sequence(head_channel, lengths, batch_first=True)
+            X_pad_data_head = tmp_2.data
+
+            tmp_3 = pack_padded_sequence(face, lengths, batch_first=True)
+            X_pad_data_face = tmp_3.data
+
+            tmp_4 = pack_padded_sequence(gaze_heatmap, lengths, batch_first=True)
+            Y_pad_data_heatmap = tmp_4.data
+
+            tmp_5 = pack_padded_sequence(inout_label, lengths, batch_first=True)
+            Y_pad_data_inout = tmp_5.data
+
+            print("tmp_1.batch_sizes: ", tmp_1.batch_sizes)
+            print("tmp_2.batch_sizes: ", tmp_2.batch_sizes)
+            print("tmp_3.batch_sizes: ", tmp_3.batch_sizes)
+            print("tmp_4.batch_sizes: ", tmp_4.batch_sizes)
+            print("tmp_5.batch_sizes: ", tmp_5.batch_sizes)
 
             hx = (torch.zeros((num_lstm_layers, args.batch_size, 512, 7, 7)).cuda(device),
                   torch.zeros((num_lstm_layers, args.batch_size, 512, 7, 7)).cuda(device)) # (num_layers, batch_size, feature dims)
@@ -216,6 +232,10 @@ def video_pack_sequences(in_batch):
             values = seq[r]
             seq_size = values.shape[0]
             seq_shape = values.shape[1:]
+
+            print("seq_size: ", seq_size)
+            print("seq_shape: ", seq_shape)
+
             lengths.append(seq_size)
             padding = torch.zeros((max_length - seq_size, *seq_shape))
             padded_values = torch.cat((values, padding))
