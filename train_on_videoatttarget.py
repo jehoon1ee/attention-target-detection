@@ -152,8 +152,8 @@ def train():
                 # In this for loop, we read batched images across the time dimension
                 # we step forward N = chunk_size frames
                 X_pad_sizes_slice = X_pad_sizes[i:i + args.chunk_size].cuda(device)
-                # curr_length = np.sum(X_pad_sizes_slice.cpu().detach().numpy())
-                curr_length = len(X_pad_sizes_slice.cpu().detach().numpy())
+                curr_length = np.sum(X_pad_sizes_slice.cpu().detach().numpy())
+                # curr_length = len(X_pad_sizes_slice.cpu().detach().numpy())
 
                 print("X_pad_sizes_slice: ", X_pad_sizes_slice)
                 print("curr_length: ", curr_length)
