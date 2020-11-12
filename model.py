@@ -444,14 +444,16 @@ class ModelSpatioTemporal(nn.Module):
         # print("len(x_pad): ", len(x_pad))
         # print("type(x_pad): ", type(x_pad))
 
-        tmp_1 = encoding[0:2]
-        tmp_2 = encoding[2:4]
-        tmp_3 = encoding[4:]
+        tmp_1 = encoding[0:0+batch_sizes[0]]
+        tmp_2 = encoding[0+batch_sizes[0]:0+batch_sizes[0]+batch_sizes[1]]
+        tmp_3 = encoding[0+batch_sizes[0]+batch_sizes[1]:]
         print("tmp_1.shape: ", tmp_1.shape)
         print("tmp_2.shape: ", tmp_2.shape)
         print("tmp_3.shape: ", tmp_3.shape)
         tmp_4 = torch.stack([tmp_1, tmp_2, tmp_3], dim = 0)
         print("tmp_4.shape: ", tmp_4.shape)
+        tmp_5 = torch.transpose(tmp_4, 0, 1)
+        print("tmp_5.shape: ", tmp_5.shape)
 
         print("x_unpack.size(): ", x_unpack.size())
         print("x_unpack_lengths: ", x_unpack_lengths)
