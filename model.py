@@ -454,9 +454,7 @@ class ModelSpatioTemporal(nn.Module):
         print("tmp_4.shape: ", tmp_4.shape)
         tmp_5 = torch.transpose(tmp_4, 0, 1)
         print("tmp_5.shape: ", tmp_5.shape)
-
-        print("x_unpack.size(): ", x_unpack.size())
-        print("x_unpack_lengths: ", x_unpack_lengths)
+        x_pad = pack_padded_sequence(tmp_5, [3, 3], batch_first=True)
 
         y, hx = self.convlstm_scene(x_pad, hx=hidden_scene)
         deconv = y.data
