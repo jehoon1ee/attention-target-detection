@@ -108,7 +108,7 @@ def train():
                 if isinstance(module, torch.nn.modules.BatchNorm3d):
                     module.eval()
 
-            print("img.shape: ", image.shape)
+            print("img.shape: ", img.shape)
             print("face.shape: ", face.shape)
             print("head_channel.shape: ", head_channel.shape)
             print("gaze_heatmap.shape: ", gaze_heatmap.shape)
