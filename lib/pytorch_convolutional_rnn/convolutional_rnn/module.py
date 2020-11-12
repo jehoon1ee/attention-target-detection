@@ -122,8 +122,8 @@ class ConvNdRNNBase(torch.nn.Module):
                                 mini_batch, self.out_channels) + input.shape[ch_dim + 1:]
 
         print("expected_hidden_size: ", expected_hidden_size)
-        print("hidden[0]: ", hidden[0])
-        print("hidden[1]: ", hidden[1])
+        print("hidden[0].size(): ", hidden[0].size())
+        print("hidden[1].size(): ", hidden[1].size())
 
         def check_hidden_size(hx, expected_hidden_size, msg='Expected hidden size {}, got {}'):
             if tuple(hx.size()) != expected_hidden_size:
