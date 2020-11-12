@@ -438,7 +438,7 @@ class ModelSpatioTemporal(nn.Module):
         encoding = self.relu(encoding)
         print("encoding shape: ", encoding.shape)
 
-        encoding.unsqueeze(encoding, 0)
+        encoding = torch.unsqueeze(encoding, 0)
         print("encoding shape: ", encoding.shape)
 
         # RW edit: x should be of shape (size, channel, width, height)
