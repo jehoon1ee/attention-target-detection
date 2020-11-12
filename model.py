@@ -444,9 +444,9 @@ class ModelSpatioTemporal(nn.Module):
         # print("len(x_pad): ", len(x_pad))
         # print("type(x_pad): ", type(x_pad))
 
-        tmp_1 = encoding[0:1]
-        tmp_2 = encoding[2:3]
-        tmp_3 = encoding[4:5]
+        tmp_1 = encoding[0:2]
+        tmp_2 = encoding[2:4]
+        tmp_3 = encoding[4:]
         print("tmp_1.shape: ", tmp_1.shape)
         print("tmp_2.shape: ", tmp_2.shape)
         print("tmp_3.shape: ", tmp_3.shape)
