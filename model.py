@@ -452,7 +452,7 @@ class ModelSpatioTemporal(nn.Module):
 
             if (batch_sizes[0] == 1):
                 row_1++
-            else if (batch_sizes[0] == 2):
+            elif (batch_sizes[0] == 2):
                 row_1++
                 row_2++
 
@@ -460,7 +460,7 @@ class ModelSpatioTemporal(nn.Module):
                 tmp_2 = encoding[0+batch_sizes[0]:0+batch_sizes[0]+batch_sizes[1]]
                 if (batch_sizes[1] == 1):
                     row_1++
-                else if (batch_sizes[1] == 2):
+                elif (batch_sizes[1] == 2):
                     row_1++
                     row_2++
 
@@ -468,7 +468,7 @@ class ModelSpatioTemporal(nn.Module):
                     tmp_3 = encoding[0+batch_sizes[0]+batch_sizes[1]:]
                     if (batch_sizes[2] == 1):
                         row_1++
-                    else if (batch_sizes[2] == 2):
+                    elif (batch_sizes[2] == 2):
                         row_1++
                         row_2++
 
