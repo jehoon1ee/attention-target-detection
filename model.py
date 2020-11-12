@@ -442,9 +442,8 @@ class ModelSpatioTemporal(nn.Module):
         # x_pad = PackedSequence(encoding, batch_sizes)
         x_pad = pack_padded_sequence(encoding, batch_sizes.cpu(), batch_first=True)
         print("len(x_pad): ", len(x_pad))
-        x_tmp.data = x_pad.data
-        x_tmp.batch_sizes = x_pad.batch_sizes
-        y, hx = self.convlstm_scene(x_tmp, hx=hidden_scene)
+        print("type(x_pad): ", type(x_pad))
+        y, hx = self.convlstm_scene(x_tmp[0:1], hx=hidden_scene)
         deconv = y.data
 
         inout_val = encoding_inout.view(-1, 49)
