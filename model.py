@@ -444,9 +444,34 @@ class ModelSpatioTemporal(nn.Module):
         # print("len(x_pad): ", len(x_pad))
         # print("type(x_pad): ", type(x_pad))
 
-        tmp_1 = encoding[0:0+batch_sizes[0]]
-        tmp_2 = encoding[0+batch_sizes[0]:0+batch_sizes[0]+batch_sizes[1]]
-        tmp_3 = encoding[0+batch_sizes[0]+batch_sizes[1]:]
+        row_1 = 0
+        row_2 = 0
+
+        if (batch_sizes[0] > 0):
+            tmp_1 = encoding[0:0+batch_sizes[0]]
+
+            if (batch_sizes[0] == 1):
+                row_1++
+            else if (batch_sizes[0] == 2):
+                row_1++
+                row_2++
+
+            if (batch_sizes[1] > 0):
+                tmp_2 = encoding[0+batch_sizes[0]:0+batch_sizes[0]+batch_sizes[1]]
+                if (batch_sizes[1] == 1):
+                    row_1++
+                else if (batch_sizes[1] == 2):
+                    row_1++
+                    row_2++
+
+                if (batch_sizes[2] > 0);
+                    tmp_3 = encoding[0+batch_sizes[0]+batch_sizes[1]:]
+                    if (batch_sizes[2] == 1):
+                        row_1++
+                    else if (batch_sizes[2] == 2):
+                        row_1++
+                        row_2++
+
         print("tmp_1.shape: ", tmp_1.shape)
         print("tmp_2.shape: ", tmp_2.shape)
         print("tmp_3.shape: ", tmp_3.shape)
@@ -454,7 +479,7 @@ class ModelSpatioTemporal(nn.Module):
         print("tmp_4.shape: ", tmp_4.shape)
         tmp_5 = torch.transpose(tmp_4, 0, 1)
         print("tmp_5.shape: ", tmp_5.shape)
-        x_pad = pack_padded_sequence(tmp_5, [3, 3], batch_first=True)
+        x_pad = pack_padded_sequence(tmp_5, [row_1, row_2], batch_first=True)
 
         y, hx = self.convlstm_scene(x_pad, hx=hidden_scene)
         deconv = y.data
