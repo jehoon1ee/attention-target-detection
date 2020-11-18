@@ -83,7 +83,7 @@ def train():
         pretrained_dict = torch.load(args.init_weights)
         pretrained_dict = pretrained_dict['model']
         model_dict.update(pretrained_dict)
-        model.load_state_dict(model_dict)    
+        model.load_state_dict(model_dict)
 
     # Loss functions
     mse_loss = nn.MSELoss(reduce=False) # not reducing in order to ignore outside cases
@@ -120,25 +120,25 @@ def train():
             gaze_heatmap_pred = gaze_heatmap_pred.squeeze(1)
 
             # [1] L2 loss computed only for inside case
-            print("\n")
-            print("gaze_heatmap_pred.shape: ", gaze_heatmap_pred.shape)
-            print("gaze_heatmap.shape: ", gaze_heatmap.shape)
+            # print("\n")
+            # print("gaze_heatmap_pred.shape: ", gaze_heatmap_pred.shape)
+            # print("gaze_heatmap.shape: ", gaze_heatmap.shape)
             l2_loss = mse_loss(gaze_heatmap_pred, gaze_heatmap) * loss_amp_factor
-            print("[1] l2_loss.shape: ", l2_loss.shape)
+            # print("[1] l2_loss.shape: ", l2_loss.shape)
             l2_loss = torch.mean(l2_loss, dim=1)
-            print("[2] l2_loss.shape: ", l2_loss.shape)
+            # print("[2] l2_loss.shape: ", l2_loss.shape)
             l2_loss = torch.mean(l2_loss, dim=1) # why twice?
-            print("[3] l2_loss.shape: ", l2_loss.shape)
+            # print("[3] l2_loss.shape: ", l2_loss.shape)
 
             gaze_inside = gaze_inside.cuda(device).to(torch.float)
-            print("gaze_inside.shape: ", gaze_inside.shape)
-            print("gaze_inside: ", gaze_inside)
+            # print("gaze_inside.shape: ", gaze_inside.shape)
+            # print("gaze_inside: ", gaze_inside)
             l2_loss = torch.mul(l2_loss, gaze_inside) # zero out loss when it's out-of-frame gaze case
             l2_loss = torch.sum(l2_loss) / torch.sum(gaze_inside)
-            print("[4] l2_loss: ", l2_loss)
+            # print("[4] l2_loss: ", l2_loss)
 
             # [2] cross entropy loss for in vs out
-            print("inout_pred: ", inout_pred)
+            # print("inout_pred: ", inout_pred)
             Xent_loss = bcelogit_loss(inout_pred.squeeze(), gaze_inside.squeeze())*100
 
             total_loss = l2_loss + Xent_loss

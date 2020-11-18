@@ -259,6 +259,7 @@ class ModelSpatial(nn.Module):
 
         # mbnet
         face_mbnet = self.mbnet(face)
+        print("face_mbnet.shape: ", face_mbnet.shape)
 
         # Head Conv
         face = self.conv1_face(face)
@@ -270,7 +271,6 @@ class ModelSpatial(nn.Module):
         face = self.layer3_face(face)
         face = self.layer4_face(face)
         face_feat = self.layer5_face(face)
-
         print("face_feat.shape: ", face_feat.shape) # [48, 1024, 7, 7]
 
         # reduce face feature size by avg pooling: (N, 1024, 7, 7) -> (N, 1024, 1, 1)
