@@ -103,7 +103,7 @@ class BottleneckConvLSTM(nn.Module):
 class ModelSpatial(nn.Module):
     # Define a ResNet 50-ish arch
     def __init__(self, block = Bottleneck, layers_scene = [3, 4, 6, 3, 2], layers_face = [3, 4, 6, 3, 2]):
-        mbnet = MobileNetV2(ch_in=3, n_classes=1000)
+        self.mbnet = MobileNetV2(ch_in=3, n_classes=1000)
 
         # Resnet Feature Extractor
         self.inplanes_scene = 64
@@ -206,6 +206,10 @@ class ModelSpatial(nn.Module):
         # reduce head channel size by max pooling: (N, 1, 224, 224) -> (N, 1, 28, 28)
         head_reduced = self.maxpool(self.maxpool(self.maxpool(head))).view(-1, 784)
         print("head_reduced.shape: ", head_reduced.shape) # [48, 784]
+
+        # mbnet
+        face_mbnet = self.mbnet(face)
+        print("face_mbnet.shape: ", face_mbnet)
 
         # Head Conv
         face = self.conv1_face(face)
