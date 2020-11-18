@@ -258,6 +258,7 @@ class ModelSpatial(nn.Module):
         print("head_reduced.shape: ", head_reduced.shape) # [48, 784]
 
         # mbnet
+        face_mbnet = self.mbnet(face)
 
         # Head Conv
         face = self.conv1_face(face)
