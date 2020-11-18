@@ -169,7 +169,7 @@ class ModelSpatial(nn.Module):
 
         return nn.Sequential(*layers)
 
-    def dwise_conv(ch_in, stride=1):
+    def dwise_conv(self, ch_in, stride=1):
         return (
             nn.Sequential(
                 #depthwise
@@ -179,7 +179,7 @@ class ModelSpatial(nn.Module):
             )
         )
 
-    def conv1x1(ch_in, ch_out):
+    def conv1x1(self, ch_in, ch_out):
         return (
             nn.Sequential(
                 nn.Conv2d(ch_in, ch_out, kernel_size=1, padding=0, stride=1, bias=False),
@@ -188,7 +188,7 @@ class ModelSpatial(nn.Module):
             )
         )
 
-    def conv3x3(ch_in, ch_out, stride):
+    def conv3x3(self, ch_in, ch_out, stride):
         return (
             nn.Sequential(
                 nn.Conv2d(ch_in, ch_out, kernel_size=3, padding=1, stride=stride, bias=False),
@@ -311,7 +311,7 @@ class InvertedBlock(nn.Module):
 
         self.layers = nn.Sequential(*layers)
 
-    def dwise_conv(ch_in, stride=1):
+    def dwise_conv(self, ch_in, stride=1):
         return (
             nn.Sequential(
                 #depthwise
@@ -321,7 +321,7 @@ class InvertedBlock(nn.Module):
             )
         )
 
-    def conv1x1(ch_in, ch_out):
+    def conv1x1(self, ch_in, ch_out):
         return (
             nn.Sequential(
                 nn.Conv2d(ch_in, ch_out, kernel_size=1, padding=0, stride=1, bias=False),
@@ -330,7 +330,7 @@ class InvertedBlock(nn.Module):
             )
         )
 
-    def conv3x3(ch_in, ch_out, stride):
+    def conv3x3(self, ch_in, ch_out, stride):
         return (
             nn.Sequential(
                 nn.Conv2d(ch_in, ch_out, kernel_size=3, padding=1, stride=stride, bias=False),
