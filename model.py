@@ -49,57 +49,6 @@ class Bottleneck(nn.Module):
 
         return out
 
-
-class BottleneckConvLSTM(nn.Module):
-    expansion = 4
-
-    def __init__(self, inplanes, planes, stride=1, downsample=None):
-        super(BottleneckConvLSTM, self).__init__()
-        self.conv1 = nn.Conv2d(inplanes, planes, kernel_size=1, bias=False)
-        self.bn1 = nn.BatchNorm2d(planes)
-        self.conv2 = nn.Conv2d(planes, planes, kernel_size=3, stride=stride,
-                               padding=1, bias=False)
-        self.bn2 = nn.BatchNorm2d(planes)
-        self.conv3 = nn.Conv2d(planes, planes * 4, kernel_size=1, bias=False)
-        self.bn3 = nn.BatchNorm2d(planes * 4)
-        self.relu = nn.ReLU(inplace=True)
-        self.downsample = downsample
-        self.bn_ds = nn.BatchNorm2d(planes * self.expansion)
-
-        self.stride = stride
-
-    def forward(self, x):
-        residual = x
-
-        out = self.conv1(x)
-        # RW edit: handles batch_size==1
-        if out.shape[0] > 1:
-            out = self.bn1(out)
-        out = self.relu(out)
-
-        out = self.conv2(out)
-        # RW edit: handles batch_size==1
-        if out.shape[0] > 1:
-            out = self.bn2(out)
-        out = self.relu(out)
-
-        out = self.conv3(out)
-        # RW edit: handles batch_size==1
-        if out.shape[0] > 1:
-            out = self.bn3(out)
-
-        if self.downsample is not None:
-            # RW edit: handles batch_size==1
-            if out.shape[0] > 1:
-                residual = self.downsample(x)
-                residual = self.bn_ds(residual)
-            else:
-                residual = self.downsample(x)
-        out += residual
-        out = self.relu(out)
-
-        return out
-
 class ModelSpatial(nn.Module):
     # Define a ResNet 50-ish arch
     def __init__(self, block = Bottleneck, layers_scene = [3, 4, 6, 3, 2], layers_face = [3, 4, 6, 3, 2]):
@@ -123,9 +72,9 @@ class ModelSpatial(nn.Module):
                 layers.append(InvertedBlock(ch_in=input_channel, ch_out=c, expand_ratio=t, stride=stride))
                 input_channel = c
 
-        self.mbnet_stem_conv = conv3x3(ch_in, 32, stride=2)
+        self.mbnet_stem_conv = self.conv3x3(ch_in, 32, stride=2)
         self.mbnet_layers = nn.Sequential(*layers)
-        self.mbnet_last_conv = conv1x1(input_channel, 1280)
+        self.mbnet_last_conv = self.conv1x1(input_channel, 1280)
 
         # Resnet Feature Extractor
         self.inplanes_scene = 64
@@ -220,6 +169,34 @@ class ModelSpatial(nn.Module):
 
         return nn.Sequential(*layers)
 
+    def dwise_conv(ch_in, stride=1):
+        return (
+            nn.Sequential(
+                #depthwise
+                nn.Conv2d(ch_in, ch_in, kernel_size=3, padding=1, stride=stride, groups=ch_in, bias=False),
+                nn.BatchNorm2d(ch_in),
+                nn.ReLU6(inplace=True),
+            )
+        )
+
+    def conv1x1(ch_in, ch_out):
+        return (
+            nn.Sequential(
+                nn.Conv2d(ch_in, ch_out, kernel_size=1, padding=0, stride=1, bias=False),
+                nn.BatchNorm2d(ch_out),
+                nn.ReLU6(inplace=True)
+            )
+        )
+
+    def conv3x3(ch_in, ch_out, stride):
+        return (
+            nn.Sequential(
+                nn.Conv2d(ch_in, ch_out, kernel_size=3, padding=1, stride=stride, bias=False),
+                nn.BatchNorm2d(ch_out),
+                nn.ReLU6(inplace=True)
+            )
+        )
+
     def forward(self, images, head, face):
         print("images.shape: ", images.shape) # [48, 3, 224 ,244]
         print("head.shape: ", head.shape) # [48, 1, 224, 224]
@@ -311,34 +288,6 @@ class ModelSpatial(nn.Module):
 ##################################################################
 ##################################################################
 
-def dwise_conv(ch_in, stride=1):
-    return (
-        nn.Sequential(
-            #depthwise
-            nn.Conv2d(ch_in, ch_in, kernel_size=3, padding=1, stride=stride, groups=ch_in, bias=False),
-            nn.BatchNorm2d(ch_in),
-            nn.ReLU6(inplace=True),
-        )
-    )
-
-def conv1x1(ch_in, ch_out):
-    return (
-        nn.Sequential(
-            nn.Conv2d(ch_in, ch_out, kernel_size=1, padding=0, stride=1, bias=False),
-            nn.BatchNorm2d(ch_out),
-            nn.ReLU6(inplace=True)
-        )
-    )
-
-def conv3x3(ch_in, ch_out, stride):
-    return (
-        nn.Sequential(
-            nn.Conv2d(ch_in, ch_out, kernel_size=3, padding=1, stride=stride, bias=False),
-            nn.BatchNorm2d(ch_out),
-            nn.ReLU6(inplace=True)
-        )
-    )
-
 class InvertedBlock(nn.Module):
     def __init__(self, ch_in, ch_out, expand_ratio, stride):
         super(InvertedBlock, self).__init__()
@@ -414,6 +363,56 @@ class MobileNetV2(nn.Module):
 ##################################################################
 ##################################################################
 ##################################################################
+
+class BottleneckConvLSTM(nn.Module):
+    expansion = 4
+
+    def __init__(self, inplanes, planes, stride=1, downsample=None):
+        super(BottleneckConvLSTM, self).__init__()
+        self.conv1 = nn.Conv2d(inplanes, planes, kernel_size=1, bias=False)
+        self.bn1 = nn.BatchNorm2d(planes)
+        self.conv2 = nn.Conv2d(planes, planes, kernel_size=3, stride=stride,
+                               padding=1, bias=False)
+        self.bn2 = nn.BatchNorm2d(planes)
+        self.conv3 = nn.Conv2d(planes, planes * 4, kernel_size=1, bias=False)
+        self.bn3 = nn.BatchNorm2d(planes * 4)
+        self.relu = nn.ReLU(inplace=True)
+        self.downsample = downsample
+        self.bn_ds = nn.BatchNorm2d(planes * self.expansion)
+
+        self.stride = stride
+
+    def forward(self, x):
+        residual = x
+
+        out = self.conv1(x)
+        # RW edit: handles batch_size==1
+        if out.shape[0] > 1:
+            out = self.bn1(out)
+        out = self.relu(out)
+
+        out = self.conv2(out)
+        # RW edit: handles batch_size==1
+        if out.shape[0] > 1:
+            out = self.bn2(out)
+        out = self.relu(out)
+
+        out = self.conv3(out)
+        # RW edit: handles batch_size==1
+        if out.shape[0] > 1:
+            out = self.bn3(out)
+
+        if self.downsample is not None:
+            # RW edit: handles batch_size==1
+            if out.shape[0] > 1:
+                residual = self.downsample(x)
+                residual = self.bn_ds(residual)
+            else:
+                residual = self.downsample(x)
+        out += residual
+        out = self.relu(out)
+
+        return out
 
 class ModelSpatioTemporal(nn.Module):
     # Define a ResNet 50-ish arch
