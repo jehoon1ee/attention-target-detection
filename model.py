@@ -258,20 +258,20 @@ class ModelSpatial(nn.Module):
         print("head_reduced.shape: ", head_reduced.shape) # [48, 784]
 
         # mbnet
-        face_mbnet = self.mbnet(face)
-        print("face_mbnet.shape: ", face_mbnet.shape)
+        face_feat = self.mbnet(face)
+        print("face_mbnet.shape: ", face_feat.shape)
 
         # Head Conv
-        face = self.conv1_face(face)
-        face = self.bn1_face(face)
-        face = self.relu(face)
-        face = self.maxpool(face)
-        face = self.layer1_face(face)
-        face = self.layer2_face(face)
-        face = self.layer3_face(face)
-        face = self.layer4_face(face)
-        face_feat = self.layer5_face(face)
-        print("face_feat.shape: ", face_feat.shape) # [48, 1024, 7, 7]
+        # face = self.conv1_face(face)
+        # face = self.bn1_face(face)
+        # face = self.relu(face)
+        # face = self.maxpool(face)
+        # face = self.layer1_face(face)
+        # face = self.layer2_face(face)
+        # face = self.layer3_face(face)
+        # face = self.layer4_face(face)
+        # face_feat = self.layer5_face(face)
+        # print("face_feat.shape: ", face_feat.shape) # [48, 1024, 7, 7]
 
         # reduce face feature size by avg pooling: (N, 1024, 7, 7) -> (N, 1024, 1, 1)
         face_feat_reduced = self.avgpool(face_feat).view(-1, 1024)
