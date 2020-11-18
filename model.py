@@ -136,7 +136,7 @@ class MobileNetV2(nn.Module):
                 input_channel = c
 
         self.layers = nn.Sequential(*layers)
-        self.last_conv = conv1x1(input_channel, 1280)
+        self.last_conv = conv1x1(input_channel, 1024)
 
     def forward(self, x):
         x = self.stem_conv(x)
