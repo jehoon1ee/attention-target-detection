@@ -103,7 +103,28 @@ class BottleneckConvLSTM(nn.Module):
 class ModelSpatial(nn.Module):
     # Define a ResNet 50-ish arch
     def __init__(self, block = Bottleneck, layers_scene = [3, 4, 6, 3, 2], layers_face = [3, 4, 6, 3, 2]):
-        self.mbnet = MobileNetV2(ch_in=3, n_classes=1000)
+        self.mbnet_configs=[
+            # t, c, n, s
+            [1, 16, 1, 1],
+            [6, 24, 2, 2],
+            [6, 32, 3, 2],
+            [6, 64, 4, 2],
+            [6, 96, 3, 1],
+            [6, 160, 3, 2],
+            [6, 320, 1, 1]
+        ]
+
+        layers = []
+        input_channel = 32
+        for t, c, n, s in self.mbnet_configs:
+            for i in range(n):
+                stride = s if i == 0 else 1
+                layers.append(InvertedBlock(ch_in=input_channel, ch_out=c, expand_ratio=t, stride=stride))
+                input_channel = c
+
+        self.mbnet_stem_conv = conv3x3(ch_in, 32, stride=2)
+        self.mbnet_layers = nn.Sequential(*layers)
+        self.mbnet_last_conv = conv1x1(input_channel, 1280)
 
         # Resnet Feature Extractor
         self.inplanes_scene = 64
@@ -208,7 +229,9 @@ class ModelSpatial(nn.Module):
         print("head_reduced.shape: ", head_reduced.shape) # [48, 784]
 
         # mbnet
-        face_mbnet = self.mbnet(face)
+        face_mbnet = self.mbnet_stem_conv(face)
+        face_mbnet = self.mbnet_layers(face)
+        face_mbnet = self.mbnet_last_conv(face)
         print("face_mbnet.shape: ", face_mbnet)
 
         # Head Conv
