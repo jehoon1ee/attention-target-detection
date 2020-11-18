@@ -52,7 +52,7 @@ class Bottleneck(nn.Module):
 class ModelSpatial(nn.Module):
     # Define a ResNet 50-ish arch
     def __init__(self, block = Bottleneck, layers_scene = [3, 4, 6, 3, 2], layers_face = [3, 4, 6, 3, 2]):
-        self.mbnet = nn.Sequential(MobileNetV2(ch_in=3, n_classes=1000))
+        self.mbnet = MobileNetV2(ch_in=3, n_classes=1000)
 
         # Resnet Feature Extractor
         self.inplanes_scene = 64
