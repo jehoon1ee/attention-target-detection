@@ -201,8 +201,13 @@ class ModelSpatial(nn.Module):
 
 
     def forward(self, images, head, face):
+        print("images.shape: ", images.shape)
+        print("head.shape: ", head.shape)
+        print("face.shape: ", face.shape)
+
         # reduce head channel size by max pooling: (N, 1, 224, 224) -> (N, 1, 28, 28)
         head_reduced = self.maxpool(self.maxpool(self.maxpool(head))).view(-1, 784)
+        print("head_reduced.shape: ", head_reduced.shape)
 
         # Head Conv
         face = self.conv1_face(face)
