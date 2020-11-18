@@ -104,6 +104,10 @@ class BottleneckConvLSTM(nn.Module):
 class ModelSpatial(nn.Module):
     # Define a ResNet 50-ish arch
     def __init__(self, block = Bottleneck, layers_scene = [3, 4, 6, 3, 2], layers_face = [3, 4, 6, 3, 2]):
+        self.mbnet = models.mobilenet_v2(pretrained=True)
+        self.mbnet.features[-1] = self.mbnet.mobilenet.ConvBNReLU(320, 1024, kernel_size=1)
+        self.mbnet_backbone = self.mbnet.features
+
         # Resnet Feature Extractor
         self.inplanes_scene = 64
         self.inplanes_face = 64
@@ -201,25 +205,27 @@ class ModelSpatial(nn.Module):
 
 
     def forward(self, images, head, face):
-        print("images.shape: ", images.shape)
-        print("head.shape: ", head.shape)
-        print("face.shape: ", face.shape)
+        print("images.shape: ", images.shape) # [48, 3, 224 ,244]
+        print("head.shape: ", head.shape) # [48, 1, 224, 224]
+        print("face.shape: ", face.shape) # [48, 3, 224, 224]
 
         # reduce head channel size by max pooling: (N, 1, 224, 224) -> (N, 1, 28, 28)
         head_reduced = self.maxpool(self.maxpool(self.maxpool(head))).view(-1, 784)
-        print("head_reduced.shape: ", head_reduced.shape)
+        print("head_reduced.shape: ", head_reduced.shape) # [48, 784]
 
         # Head Conv
-        face = self.conv1_face(face)
-        face = self.bn1_face(face)
-        face = self.relu(face)
-        face = self.maxpool(face)
-        face = self.layer1_face(face)
-        face = self.layer2_face(face)
-        face = self.layer3_face(face)
-        face = self.layer4_face(face)
-        face_feat = self.layer5_face(face)
-        print("face_feat.shape: ", face_feat.shape)
+        # face = self.conv1_face(face)
+        # face = self.bn1_face(face)
+        # face = self.relu(face)
+        # face = self.maxpool(face)
+        # face = self.layer1_face(face)
+        # face = self.layer2_face(face)
+        # face = self.layer3_face(face)
+        # face = self.layer4_face(face)
+        # face_feat = self.layer5_face(face)
+
+        face_feat = self.mbnet.mbnet_backbone(face)
+        print("face_feat.shape: ", face_feat.shape) # [48, 1024, 7, 7]
 
         # reduce face feature size by avg pooling: (N, 1024, 7, 7) -> (N, 1024, 1, 1)
         face_feat_reduced = self.avgpool(face_feat).view(-1, 1024)
@@ -241,7 +247,7 @@ class ModelSpatial(nn.Module):
         im = self.layer3_scene(im)
         im = self.layer4_scene(im)
         scene_feat = self.layer5_scene(im)
-        print("scene_feat.shape: ", scene_feat.shape)
+        print("scene_feat.shape: ", scene_feat.shape) # [48, 1024, 7, 7]
         # attn_weights = torch.ones(attn_weights.shape)/49.0
 
         attn_applied_scene_feat = torch.mul(attn_weights, scene_feat) # (N, 1, 7, 7) # applying attention weights on scene feat
