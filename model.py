@@ -178,9 +178,14 @@ class ModelSpatial(nn.Module):
         self.layer4_face = self._make_layer_face(block, 512, layers_face[3], stride=2)
         self.layer5_face = self._make_layer_face(block, 256, layers_face[4], stride=1) # additional to resnet50
 
+        # mobilenetv2
         mbnet_layers = []
-        mbnet_layers.append(MobileNetV2(ch_in=3, n_classes=1000))
+        mbnet_layers.append(MobileNetV2(ch_in=3))
         self.mbnet = nn.Sequential(*mbnet_layers)
+
+        mbnet2_layers = []
+        mbnet2_layers.append(MobileNetV2(ch_in=4))
+        self.mbnet2 = nn.Sequential(*mbnet2_layers)
 
         # attention
         self.attn = nn.Linear(1808, 1*7*7)
@@ -284,15 +289,17 @@ class ModelSpatial(nn.Module):
 
         # Scene Conv
         im = torch.cat((images, head), dim=1)
-        im = self.conv1_scene(im)
-        im = self.bn1_scene(im)
-        im = self.relu(im)
-        im = self.maxpool(im)
-        im = self.layer1_scene(im)
-        im = self.layer2_scene(im)
-        im = self.layer3_scene(im)
-        im = self.layer4_scene(im)
-        scene_feat = self.layer5_scene(im)
+        scene_feat = self.mbnet2(im)
+
+        # im = self.conv1_scene(im)
+        # im = self.bn1_scene(im)
+        # im = self.relu(im)
+        # im = self.maxpool(im)
+        # im = self.layer1_scene(im)
+        # im = self.layer2_scene(im)
+        # im = self.layer3_scene(im)
+        # im = self.layer4_scene(im)
+        # scene_feat = self.layer5_scene(im)
         print("scene_feat.shape: ", scene_feat.shape) # [48, 1024, 7, 7]
         # attn_weights = torch.ones(attn_weights.shape)/49.0
 

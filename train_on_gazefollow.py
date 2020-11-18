@@ -157,7 +157,7 @@ def train():
                 ind = np.random.choice(len(images), replace=False)
                 writer.add_scalar("Train Loss", total_loss, global_step=step)
 
-            if batch+1 == max_steps:
+            if (batch != 0 and batch % args.eval_every == 0) or batch+1 == max_steps:
                 print('Validation in progress ...')
                 model.train(False)
                 AUC = []; min_dist = []; avg_dist = []
