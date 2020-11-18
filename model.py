@@ -52,29 +52,7 @@ class Bottleneck(nn.Module):
 class ModelSpatial(nn.Module):
     # Define a ResNet 50-ish arch
     def __init__(self, block = Bottleneck, layers_scene = [3, 4, 6, 3, 2], layers_face = [3, 4, 6, 3, 2]):
-        self.mbnet_configs=[
-            # t, c, n, s
-            [1, 16, 1, 1],
-            [6, 24, 2, 2],
-            [6, 32, 3, 2],
-            [6, 64, 4, 2],
-            [6, 96, 3, 1],
-            [6, 160, 3, 2],
-            [6, 320, 1, 1]
-        ]
-
-        ch_in = 3
-        layers = []
-        input_channel = 32
-        for t, c, n, s in self.mbnet_configs:
-            for i in range(n):
-                stride = s if i == 0 else 1
-                layers.append(InvertedBlock(ch_in=input_channel, ch_out=c, expand_ratio=t, stride=stride))
-                input_channel = c
-
-        self.mbnet_stem_conv = self.conv3x3(ch_in, 32, stride=2)
-        self.mbnet_layers = nn.Sequential(*layers)
-        self.mbnet_last_conv = self.conv1x1(input_channel, 1280)
+        self.mbnet = nn.Sequential(MobileNetV2(ch_in=3, n_classes=1000))
 
         # Resnet Feature Extractor
         self.inplanes_scene = 64
@@ -169,34 +147,6 @@ class ModelSpatial(nn.Module):
 
         return nn.Sequential(*layers)
 
-    def dwise_conv(self, ch_in, stride=1):
-        return (
-            nn.Sequential(
-                #depthwise
-                nn.Conv2d(ch_in, ch_in, kernel_size=3, padding=1, stride=stride, groups=ch_in, bias=False),
-                nn.BatchNorm2d(ch_in),
-                nn.ReLU6(inplace=True),
-            )
-        )
-
-    def conv1x1(self, ch_in, ch_out):
-        return (
-            nn.Sequential(
-                nn.Conv2d(ch_in, ch_out, kernel_size=1, padding=0, stride=1, bias=False),
-                nn.BatchNorm2d(ch_out),
-                nn.ReLU6(inplace=True)
-            )
-        )
-
-    def conv3x3(self, ch_in, ch_out, stride):
-        return (
-            nn.Sequential(
-                nn.Conv2d(ch_in, ch_out, kernel_size=3, padding=1, stride=stride, bias=False),
-                nn.BatchNorm2d(ch_out),
-                nn.ReLU6(inplace=True)
-            )
-        )
-
     def forward(self, images, head, face):
         print("images.shape: ", images.shape) # [48, 3, 224 ,244]
         print("head.shape: ", head.shape) # [48, 1, 224, 224]
@@ -207,10 +157,6 @@ class ModelSpatial(nn.Module):
         print("head_reduced.shape: ", head_reduced.shape) # [48, 784]
 
         # mbnet
-        face_mbnet = self.mbnet_stem_conv(face)
-        face_mbnet = self.mbnet_layers(face)
-        face_mbnet = self.mbnet_last_conv(face)
-        print("face_mbnet.shape: ", face_mbnet)
 
         # Head Conv
         face = self.conv1_face(face)
@@ -288,6 +234,34 @@ class ModelSpatial(nn.Module):
 ##################################################################
 ##################################################################
 
+def dwise_conv(ch_in, stride=1):
+    return (
+        nn.Sequential(
+            #depthwise
+            nn.Conv2d(ch_in, ch_in, kernel_size=3, padding=1, stride=stride, groups=ch_in, bias=False),
+            nn.BatchNorm2d(ch_in),
+            nn.ReLU6(inplace=True),
+        )
+    )
+
+def conv1x1(ch_in, ch_out):
+    return (
+        nn.Sequential(
+            nn.Conv2d(ch_in, ch_out, kernel_size=1, padding=0, stride=1, bias=False),
+            nn.BatchNorm2d(ch_out),
+            nn.ReLU6(inplace=True)
+        )
+    )
+
+def conv3x3(ch_in, ch_out, stride):
+    return (
+        nn.Sequential(
+            nn.Conv2d(ch_in, ch_out, kernel_size=3, padding=1, stride=stride, bias=False),
+            nn.BatchNorm2d(ch_out),
+            nn.ReLU6(inplace=True)
+        )
+    )
+
 class InvertedBlock(nn.Module):
     def __init__(self, ch_in, ch_out, expand_ratio, stride):
         super(InvertedBlock, self).__init__()
@@ -301,43 +275,15 @@ class InvertedBlock(nn.Module):
 
         layers = []
         if expand_ratio != 1:
-            layers.append(self.conv1x1(ch_in, hidden_dim))
+            layers.append(conv1x1(ch_in, hidden_dim))
         layers.extend([
             #dw
-            self.dwise_conv(hidden_dim, stride=stride),
+            dwise_conv(hidden_dim, stride=stride),
             #pw
-            self.conv1x1(hidden_dim, ch_out)
+            conv1x1(hidden_dim, ch_out)
         ])
 
         self.layers = nn.Sequential(*layers)
-
-    def dwise_conv(self, ch_in, stride=1):
-        return (
-            nn.Sequential(
-                #depthwise
-                nn.Conv2d(ch_in, ch_in, kernel_size=3, padding=1, stride=stride, groups=ch_in, bias=False),
-                nn.BatchNorm2d(ch_in),
-                nn.ReLU6(inplace=True),
-            )
-        )
-
-    def conv1x1(self, ch_in, ch_out):
-        return (
-            nn.Sequential(
-                nn.Conv2d(ch_in, ch_out, kernel_size=1, padding=0, stride=1, bias=False),
-                nn.BatchNorm2d(ch_out),
-                nn.ReLU6(inplace=True)
-            )
-        )
-
-    def conv3x3(self, ch_in, ch_out, stride):
-        return (
-            nn.Sequential(
-                nn.Conv2d(ch_in, ch_out, kernel_size=3, padding=1, stride=stride, bias=False),
-                nn.BatchNorm2d(ch_out),
-                nn.ReLU6(inplace=True)
-            )
-        )
 
     def forward(self, x):
         if self.use_res_connect:
@@ -371,21 +317,12 @@ class MobileNetV2(nn.Module):
                 input_channel = c
 
         self.layers = nn.Sequential(*layers)
-
-        self.last_conv = conv1x1(input_channel, 1024)
-
-        self.classifier = nn.Sequential(
-            nn.Dropout2d(0.2),
-            nn.Linear(1280, n_classes)
-        )
-        self.avg_pool = nn.AdaptiveAvgPool2d(1)
+        self.last_conv = conv1x1(input_channel, 1280)
 
     def forward(self, x):
         x = self.stem_conv(x)
         x = self.layers(x)
         x = self.last_conv(x)
-        # x = self.avg_pool(x).view(-1, 1280)
-        # x = self.classifier(x)
         return x
 
 ##################################################################
