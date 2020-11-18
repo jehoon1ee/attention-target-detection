@@ -114,6 +114,7 @@ class ModelSpatial(nn.Module):
             [6, 320, 1, 1]
         ]
 
+        ch_in = 3
         layers = []
         input_channel = 32
         for t, c, n, s in self.mbnet_configs:
