@@ -3,7 +3,6 @@ from torchvision import transforms
 import torch.nn as nn
 
 from model import ModelSpatial
-from mobileNetV2 import GazeNet
 from dataset import GazeFollow
 from config import *
 from utils import imutils, evaluation
