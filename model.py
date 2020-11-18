@@ -104,10 +104,6 @@ class BottleneckConvLSTM(nn.Module):
 class ModelSpatial(nn.Module):
     # Define a ResNet 50-ish arch
     def __init__(self, block = Bottleneck, layers_scene = [3, 4, 6, 3, 2], layers_face = [3, 4, 6, 3, 2]):
-        self.mbnet = models.mobilenet_v2(pretrained=True)
-        self.mbnet.features[-1] = self.mbnet.mobilenet.ConvBNReLU(320, 1024, kernel_size=1)
-        self.mbnet_backbone = self.mbnet.features
-
         # Resnet Feature Extractor
         self.inplanes_scene = 64
         self.inplanes_face = 64
@@ -214,17 +210,16 @@ class ModelSpatial(nn.Module):
         print("head_reduced.shape: ", head_reduced.shape) # [48, 784]
 
         # Head Conv
-        # face = self.conv1_face(face)
-        # face = self.bn1_face(face)
-        # face = self.relu(face)
-        # face = self.maxpool(face)
-        # face = self.layer1_face(face)
-        # face = self.layer2_face(face)
-        # face = self.layer3_face(face)
-        # face = self.layer4_face(face)
-        # face_feat = self.layer5_face(face)
+        face = self.conv1_face(face)
+        face = self.bn1_face(face)
+        face = self.relu(face)
+        face = self.maxpool(face)
+        face = self.layer1_face(face)
+        face = self.layer2_face(face)
+        face = self.layer3_face(face)
+        face = self.layer4_face(face)
+        face_feat = self.layer5_face(face)
 
-        face_feat = self.mbnet.mbnet_backbone(face)
         print("face_feat.shape: ", face_feat.shape) # [48, 1024, 7, 7]
 
         # reduce face feature size by avg pooling: (N, 1024, 7, 7) -> (N, 1024, 1, 1)

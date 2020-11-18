@@ -3,6 +3,7 @@ from torchvision import transforms
 import torch.nn as nn
 
 from model import ModelSpatial
+from mobileNetV2 import GazeNet
 from dataset import GazeFollow
 from config import *
 from utils import imutils, evaluation
@@ -82,7 +83,7 @@ def train():
         pretrained_dict = torch.load(args.init_weights)
         pretrained_dict = pretrained_dict['model']
         model_dict.update(pretrained_dict)
-        model.load_state_dict(model_dict)
+        model.load_state_dict(model_dict)    
 
     # Loss functions
     mse_loss = nn.MSELoss(reduce=False) # not reducing in order to ignore outside cases
