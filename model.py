@@ -201,7 +201,10 @@ class ModelSpatial(nn.Module):
 
 
     def forward(self, images, head, face):
-        # with profiler.profile(record_shapes=True, profile_memory=True, use_cuda=True) as prof_head:
+        # reduce head channel size by max pooling: (N, 1, 224, 224) -> (N, 1, 28, 28)
+        head_reduced = self.maxpool(self.maxpool(self.maxpool(head))).view(-1, 784)
+
+        # Head Conv
         face = self.conv1_face(face)
         face = self.bn1_face(face)
         face = self.relu(face)
@@ -211,21 +214,19 @@ class ModelSpatial(nn.Module):
         face = self.layer3_face(face)
         face = self.layer4_face(face)
         face_feat = self.layer5_face(face)
-        # print(prof_head.key_averages(group_by_input_shape=True).table(sort_by="cuda_time_total", row_limit=20))
+        print("face_feat.shape: ", face_feat.shape)
 
-        # reduce head channel size by max pooling: (N, 1, 224, 224) -> (N, 1, 28, 28)
-        head_reduced = self.maxpool(self.maxpool(self.maxpool(head))).view(-1, 784)
         # reduce face feature size by avg pooling: (N, 1024, 7, 7) -> (N, 1024, 1, 1)
         face_feat_reduced = self.avgpool(face_feat).view(-1, 1024)
+
         # get and reshape attention weights such that it can be multiplied with scene feature map
         attn_weights = self.attn(torch.cat((head_reduced, face_feat_reduced), 1))
         attn_weights = attn_weights.view(-1, 1, 49)
         attn_weights = F.softmax(attn_weights, dim=2) # soft attention weights single-channel
         attn_weights = attn_weights.view(-1, 1, 7, 7)
 
+        # Scene Conv
         im = torch.cat((images, head), dim=1)
-
-        # with profiler.profile(record_shapes=True, profile_memory=True, use_cuda=True) as prof_scene:
         im = self.conv1_scene(im)
         im = self.bn1_scene(im)
         im = self.relu(im)
@@ -235,15 +236,14 @@ class ModelSpatial(nn.Module):
         im = self.layer3_scene(im)
         im = self.layer4_scene(im)
         scene_feat = self.layer5_scene(im)
-        # print(prof_scene.key_averages(group_by_input_shape=True).table(sort_by="cuda_time_total", row_limit=20))
+        print("scene_feat.shape: ", scene_feat.shape)
         # attn_weights = torch.ones(attn_weights.shape)/49.0
 
-        # with profiler.profile(record_shapes=True, profile_memory=True, use_cuda=True) as prof_remaining:
         attn_applied_scene_feat = torch.mul(attn_weights, scene_feat) # (N, 1, 7, 7) # applying attention weights on scene feat
 
         scene_face_feat = torch.cat((attn_applied_scene_feat, face_feat), 1)
 
-        # scene + face feat -> in/out
+        # In Frame?: scene + face feat -> in/out
         encoding_inout = self.compress_conv1_inout(scene_face_feat)
         encoding_inout = self.compress_bn1_inout(encoding_inout)
         encoding_inout = self.relu(encoding_inout)
@@ -253,7 +253,7 @@ class ModelSpatial(nn.Module):
         encoding_inout = encoding_inout.view(-1, 49)
         encoding_inout = self.fc_inout(encoding_inout)
 
-        # scene + face feat -> encoding -> decoding
+        # Encode: scene + face feat -> encoding -> decoding
         encoding = self.compress_conv1(scene_face_feat)
         encoding = self.compress_bn1(encoding)
         encoding = self.relu(encoding)
@@ -261,19 +261,19 @@ class ModelSpatial(nn.Module):
         encoding = self.compress_bn2(encoding)
         encoding = self.relu(encoding)
 
-        x = self.deconv1(encoding)
-        x = self.deconv_bn1(x)
-        x = self.relu(x)
-        x = self.deconv2(x)
-        x = self.deconv_bn2(x)
-        x = self.relu(x)
-        x = self.deconv3(x)
-        x = self.deconv_bn3(x)
-        x = self.relu(x)
-        x = self.conv4(x)
-        # print(prof_remaining.key_averages(group_by_input_shape=True).table(sort_by="cuda_time_total", row_limit=20))
+        # Decode
+        gaze_heatmap_pred = self.deconv1(encoding)
+        gaze_heatmap_pred = self.deconv_bn1(gaze_heatmap_pred)
+        gaze_heatmap_pred = self.relu(gaze_heatmap_pred)
+        gaze_heatmap_pred = self.deconv2(gaze_heatmap_pred)
+        gaze_heatmap_pred = self.deconv_bn2(gaze_heatmap_pred)
+        gaze_heatmap_pred = self.relu(gaze_heatmap_pred)
+        gaze_heatmap_pred = self.deconv3(gaze_heatmap_pred)
+        gaze_heatmap_pred = self.deconv_bn3(gaze_heatmap_pred)
+        gaze_heatmap_pred = self.relu(gaze_heatmap_pred)
+        gaze_heatmap_pred = self.conv4(gaze_heatmap_pred)
 
-        return x, torch.mean(attn_weights, 1, keepdim=True), encoding_inout
+        return gaze_heatmap_pred, torch.mean(attn_weights, 1, keepdim=True), encoding_inout
 
 
 class ModelSpatioTemporal(nn.Module):
