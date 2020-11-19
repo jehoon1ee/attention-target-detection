@@ -50,6 +50,7 @@ def test():
 
     # Load model
     print("Constructing model")
+    print("Loading init_weights ", args.model_weights)
     model = ModelSpatial()
     model.cuda().to(device)
     model_dict = model.state_dict()
