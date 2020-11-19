@@ -16,6 +16,7 @@ import numpy as np
 from PIL import Image
 from tensorboardX import SummaryWriter
 import warnings
+import time
 
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
@@ -101,6 +102,7 @@ def train():
     print("Training in progress ...")
     for ep in range(args.epochs):
         for batch, (img, face, head_channel, gaze_heatmap, name, gaze_inside) in enumerate(train_loader):
+            print(time.strftime('%c', time.localtime(time.time())))
             print("batch: ", j)
             j += 1
 
