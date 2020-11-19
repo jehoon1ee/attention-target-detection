@@ -2,7 +2,7 @@ import torch
 from torchvision import transforms
 import torch.nn as nn
 
-from model import ModelSpatial
+from model_mbnet import ModelSpatial
 from dataset import GazeFollow
 from config import *
 from utils import imutils, evaluation
@@ -10,7 +10,6 @@ from utils import imutils, evaluation
 import argparse
 import os
 import numpy as np
-# from scipy.misc import imresize
 from PIL import Image
 import warnings
 import sys
@@ -50,6 +49,7 @@ def test():
 
     # Load model
     print("Constructing model")
+    print("Loading init_weights ", args.model_weights)
     model = ModelSpatial()
     model.cuda().to(device)
     model_dict = model.state_dict()
