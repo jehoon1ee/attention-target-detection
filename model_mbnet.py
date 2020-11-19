@@ -57,7 +57,7 @@ def dwise_conv(ch_in, stride=1):
     return (
         nn.Sequential(
             #depthwise
-            nn.Conv2d(ch_in, ch_in, kernel_size=3, padding=1, stride=stride, groups=ch_in, bias=False),
+            nn.Conv2d(ch_in, ch_in, kernel_size=3, stride=stride, padding=1, groups=ch_in, bias=False),
             nn.BatchNorm2d(ch_in),
             nn.ReLU6(inplace=True),
         )
@@ -66,16 +66,24 @@ def dwise_conv(ch_in, stride=1):
 def conv1x1(ch_in, ch_out):
     return (
         nn.Sequential(
-            nn.Conv2d(ch_in, ch_out, kernel_size=1, padding=0, stride=1, bias=False),
+            nn.Conv2d(ch_in, ch_out, kernel_size=1, stride=1, padding=0, bias=False),
             nn.BatchNorm2d(ch_out),
             nn.ReLU6(inplace=True)
+        )
+    )
+
+def conv1x1_nonlinear(ch_in, ch_out):
+    return (
+        nn.Sequential(
+            nn.Conv2d(ch_in, ch_out, kernel_size=1, stride=1, padding=0, bias=False),
+            nn.BatchNorm2d(ch_out)
         )
     )
 
 def conv3x3(ch_in, ch_out, stride):
     return (
         nn.Sequential(
-            nn.Conv2d(ch_in, ch_out, kernel_size=3, padding=1, stride=stride, bias=False),
+            nn.Conv2d(ch_in, ch_out, kernel_size=3, stride=stride, padding=1, bias=False),
             nn.BatchNorm2d(ch_out),
             nn.ReLU6(inplace=True)
         )
@@ -87,17 +95,15 @@ class InvertedBlock(nn.Module):
 
         self.stride = stride
         assert stride in [1,2]
-
         hidden_dim = ch_in * expand_ratio
-
-        self.use_res_connect = self.stride==1 and ch_in==ch_out
+        self.use_res_connect = self.stride == 1 and ch_in == ch_out
 
         layers = []
         if expand_ratio != 1:
             layers.append(conv1x1(ch_in, hidden_dim))
         layers.extend([
             dwise_conv(hidden_dim, stride=stride), #dw
-            conv1x1(hidden_dim, ch_out) #pw
+            conv1x1_nonlinear(hidden_dim, ch_out) #pw
         ])
 
         self.layers = nn.Sequential(*layers)
@@ -135,12 +141,24 @@ class MobileNetV2(nn.Module):
 
         self.layers = nn.Sequential(*layers)
         self.last_conv = conv1x1(input_channel, 1024)
+        self._initialize_weights()
 
     def forward(self, x):
         x = self.stem_conv(x)
         x = self.layers(x)
         x = self.last_conv(x)
         return x
+
+    def _initialize_weights(self):
+        for m in self.modules():
+            if isinstance(m, nn.Conv2d):
+                n = m.kernel_size[0] * m.kernel_size[1] * m.out_channels
+                m.weight.data.normal_(0, math.sqrt(2. / n))
+                if m.bias is not None:
+                    m.bias.data.zero_()
+            elif isinstance(m, nn.BatchNorm2d):
+                m.weight.data.fill_(1)
+                m.bias.data.zero_()
 
 ##################################################################
 ##################################################################

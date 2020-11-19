@@ -26,7 +26,7 @@ parser.add_argument("--device", type=int, default=0, help="gpu id")
 parser.add_argument("--init_weights", type=str, default="initial_weights_for_spatial_training.pt", help="initial weights")
 parser.add_argument("--lr", type=float, default=2.5e-4, help="learning rate")
 parser.add_argument("--batch_size", type=int, default=48, help="batch size")
-parser.add_argument("--epochs", type=int, default=3, help="number of epochs")
+parser.add_argument("--epochs", type=int, default=50, help="number of epochs")
 parser.add_argument("--print_every", type=int, default=100, help="print every ___ iterations")
 parser.add_argument("--eval_every", type=int, default=1000, help="evaluate every ___ iterations")
 parser.add_argument("--save_every", type=int, default=1, help="save every ___ epochs")
@@ -102,10 +102,6 @@ def train():
     print("Training in progress ...")
     for ep in range(args.epochs):
         for batch, (img, face, head_channel, gaze_heatmap, name, gaze_inside) in enumerate(train_loader):
-            print(time.strftime('%c', time.localtime(time.time())))
-            print("batch: ", j)
-            j += 1
-
             model.train(True)
             images = img.cuda().to(device)
             head = head_channel.cuda().to(device)
@@ -153,6 +149,7 @@ def train():
             step += 1
 
             if batch % args.print_every == 0:
+                print(time.strftime('%c', time.localtime(time.time())))
                 print("Epoch:{:04d}\tstep:{:06d}/{:06d}\ttraining loss: (l2){:.4f} (Xent){:.4f}".format(ep, batch+1, max_steps, l2_loss, Xent_loss))
                 # Tensorboard
                 ind = np.random.choice(len(images), replace=False)
