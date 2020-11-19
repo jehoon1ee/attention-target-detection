@@ -63,12 +63,10 @@ def test():
     AUC = []; min_dist = []; avg_dist = []
 
     np.set_printoptions(threshold=sys.maxsize)
-    i = 0
-    j = 0
 
     with torch.no_grad():
         for val_batch, (val_img, val_face, val_head_channel, val_gaze_heatmap, cont_gaze, imsize, _) in enumerate(val_loader):
-            print("batch: ", j)
+            print("val_batch: ", val_batch)
 
             val_images = val_img.cuda().to(device)
             val_faces = val_face.cuda().to(device)
@@ -126,8 +124,6 @@ def test():
             #     mean_gt_gaze = torch.mean(valid_gaze, 0)
             #     avg_distance = evaluation.L2_dist(mean_gt_gaze, norm_p)
             #     avg_dist.append(avg_distance)
-
-                j += 1
 
     # print("\tAUC:{:.4f}\tmin dist:{:.4f}\tavg dist:{:.4f}".format(
     #       torch.mean(torch.tensor(AUC)),
