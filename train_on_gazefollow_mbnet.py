@@ -133,7 +133,7 @@ def train():
 
             # [2] cross entropy loss for in vs out
             # print("inout_pred: ", inout_pred)
-            Xent_loss = bcelogit_loss(inout_pred.squeeze(), gaze_inside.squeeze()) * 300
+            Xent_loss = bcelogit_loss(inout_pred.squeeze(), gaze_inside.squeeze()) * 500
 
             total_loss = l2_loss + Xent_loss
             # NOTE: summed loss is used to train the main model.
@@ -170,10 +170,9 @@ def train():
                             # remove padding and recover valid ground truth points
                             valid_gaze = cont_gaze[b_i]
                             valid_gaze = valid_gaze[valid_gaze != -1].view(-1,2)
-                            # AUC: area under curve of ROC
-                            multi_hot = imutils.multi_hot_targets(cont_gaze[b_i], imsize[b_i])
 
                             # [1] auc
+                            multi_hot = imutils.multi_hot_targets(cont_gaze[b_i], imsize[b_i])
                             tmp1 = imsize[b_i][0].item()
                             tmp2 = imsize[b_i][1].item()
                             scaled_heatmap = np.array(Image.fromarray(val_gaze_heatmap_pred[b_i].cpu().detach().numpy()).resize((tmp1, tmp2), Image.BILINEAR))
