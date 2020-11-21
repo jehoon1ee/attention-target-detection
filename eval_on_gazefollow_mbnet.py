@@ -76,39 +76,39 @@ def test():
             val_gaze_heatmap_pred, val_attmap, val_inout_pred = model(val_images, val_head, val_faces)
             val_gaze_heatmap_pred = val_gaze_heatmap_pred.squeeze(1)
 
-            # if (j == 0):
-            #     print("val_images.shape: ", val_images.shape)
-            #     print("val_head.shape: ", val_head.shape)
-            #     print("val_faces.shape: ", val_faces.shape)
-            #     print("val_gaze_heatmap.shape: ", val_gaze_heatmap.shape)
-            #     print("cont_gaze.shape: ", cont_gaze.shape)
-            #     print("imsize.shape: ", imsize.shape)
-            #     print("val_gaze_heatmap_pred.shape: ", val_gaze_heatmap_pred.shape)
-            #     print("val_attmap.shape: ", val_attmap.shape)
-            #     print("val_inout_pred.shape: ", val_inout_pred.shape)
+            if (val_batch == 0):
+                print("val_images.shape: ", val_images.shape)
+                print("val_head.shape: ", val_head.shape)
+                print("val_faces.shape: ", val_faces.shape)
+                print("val_gaze_heatmap.shape: ", val_gaze_heatmap.shape)
+                print("cont_gaze.shape: ", cont_gaze.shape)
+                print("imsize.shape: ", imsize.shape)
+                print("val_gaze_heatmap_pred.shape: ", val_gaze_heatmap_pred.shape)
+                print("val_attmap.shape: ", val_attmap.shape)
+                print("val_inout_pred.shape: ", val_inout_pred.shape)
 
             # go through each data point and record AUC, min dist, avg dist
             for b_i in range(len(cont_gaze)):
 
                 # remove padding and recover valid ground truth points
                 valid_gaze = cont_gaze[b_i]
-                # if (j == 0):
-                #     print("before view() valid_gaze.shape: ", valid_gaze.shape)
+                if (val_batch == 0):
+                    print("before view() valid_gaze.shape: ", valid_gaze.shape)
                 valid_gaze = valid_gaze[valid_gaze != -1].view(-1,2)
-                # if (j == 0):
-                #     print("after view() valid_gaze.shape: ", valid_gaze.shape)
+                if (val_batch == 0):
+                    print("after view() valid_gaze.shape: ", valid_gaze.shape)
                 # AUC: area under curve of ROC
                 multi_hot = imutils.multi_hot_targets(cont_gaze[b_i], imsize[b_i])
-                # if (j == 0):
-                #     print("multi_hot.shape: ", multi_hot.shape)
-                #     print("imsize[b_i]: ", imsize[b_i])
+                if (val_batch == 0):
+                    print("multi_hot.shape: ", multi_hot.shape)
+                    print("imsize[b_i]: ", imsize[b_i])
 
                 # [1] auc
                 tmp1 = imsize[b_i][0].item()
                 tmp2 = imsize[b_i][1].item()
                 scaled_heatmap = np.array(Image.fromarray(val_gaze_heatmap_pred[b_i].cpu().detach().numpy()).resize((tmp1, tmp2), Image.BILINEAR))
-                # if (j == 0):
-                #     print("scaled_heatmap.shape: ", scaled_heatmap.shape)
+                if (val_batch == 0):
+                    print("scaled_heatmap.shape: ", scaled_heatmap.shape)
                 auc_score = evaluation.auc(scaled_heatmap, multi_hot)
                 AUC.append(auc_score)
 

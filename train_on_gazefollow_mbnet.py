@@ -96,8 +96,6 @@ def train():
     max_steps = len(train_loader)
     optimizer.zero_grad()
 
-    j = 0
-
     print("Training in progress ...")
     for ep in range(args.epochs):
         for batch, (img, face, head_channel, gaze_heatmap, name, gaze_inside) in enumerate(train_loader):
@@ -135,7 +133,7 @@ def train():
 
             # [2] cross entropy loss for in vs out
             # print("inout_pred: ", inout_pred)
-            Xent_loss = bcelogit_loss(inout_pred.squeeze(), gaze_inside.squeeze())*100
+            Xent_loss = bcelogit_loss(inout_pred.squeeze(), gaze_inside.squeeze()) * 300
 
             total_loss = l2_loss + Xent_loss
             # NOTE: summed loss is used to train the main model.
