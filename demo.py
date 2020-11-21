@@ -82,21 +82,18 @@ def run():
             frame = frame.unsqueeze(0).cuda()
             head_channel = head_channel.unsqueeze(0).cuda()
 
-            print("frame.shape: ", frame.shape)
-            print("head.shape: ", head.shape)
-            print("head_channel.shape: ", head_channel.shape)
+            # print("frame.shape: ", frame.shape)
+            # print("head.shape: ", head.shape)
+            # print("head_channel.shape: ", head_channel.shape)
 
             # forward pass
             raw_hm, _, inout = model(frame, head_channel, head)
-
-            # pyprof
-            # with torch.autograd.profiler.emit_nvtx():
-            #     raw_hm, _, inout = model(frame, head_channel, head)
+            print("inout: ", inout)
 
             # heatmap modulation
             raw_hm = raw_hm.cpu().detach().numpy() * 255
             raw_hm = raw_hm.squeeze()
-            print("raw_hm shape: ", raw_hm.shape)
+            # print("raw_hm shape: ", raw_hm.shape)
             # print ("raw_hm: ", raw_hm)
 
             inout = inout.cpu().detach().numpy()
