@@ -85,8 +85,8 @@ def train():
     model.load_state_dict(model_dict)
 
     for name, param in model.named_parameters():
-    if param.requires_grad:
-        print name, param.data
+        if param.requires_grad:
+            print name, param.data
 
     # Loss functions
     mse_loss = nn.MSELoss(reduce=False) # not reducing in order to ignore outside cases
