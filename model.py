@@ -177,13 +177,13 @@ class ModelSpatial(nn.Module):
         self.layer5_face = self._make_layer_face(block, 256, layers_face[4], stride=1) # additional to resnet50
 
         # mobilenetv2
-        mbnet_layers = []
-        mbnet_layers.append(MobileNetV2(ch_in=3))
-        self.mbnet = nn.Sequential(*mbnet_layers)
-
-        mbnet2_layers = []
-        mbnet2_layers.append(MobileNetV2(ch_in=4))
-        self.mbnet2 = nn.Sequential(*mbnet2_layers)
+        # mbnet_layers = []
+        # mbnet_layers.append(MobileNetV2(ch_in=3))
+        # self.mbnet = nn.Sequential(*mbnet_layers)
+        #
+        # mbnet2_layers = []
+        # mbnet2_layers.append(MobileNetV2(ch_in=4))
+        # self.mbnet2 = nn.Sequential(*mbnet2_layers)
 
         # attention
         self.attn = nn.Linear(1808, 1*7*7)
