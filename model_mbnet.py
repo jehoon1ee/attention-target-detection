@@ -280,6 +280,17 @@ class ModelSpatial(nn.Module):
 
         # Head Conv mbnet
         face_feat = self.mbnet(face)
+
+        # Head Conv
+        # face = self.conv1_face(face)
+        # face = self.bn1_face(face)
+        # face = self.relu(face)
+        # face = self.maxpool(face)
+        # face = self.layer1_face(face)
+        # face = self.layer2_face(face)
+        # face = self.layer3_face(face)
+        # face = self.layer4_face(face)
+        # face_feat = self.layer5_face(face)
         # print("face_feat.shape: ", face_feat.shape) # [48, 1024, 7, 7]
 
         # reduce face feature size by avg pooling: (N, 1024, 7, 7) -> (N, 1024, 1, 1)
@@ -294,6 +305,16 @@ class ModelSpatial(nn.Module):
         # Scene Conv
         im = torch.cat((images, head), dim=1)
         scene_feat = self.mbnet2(im)
+
+        # im = self.conv1_scene(im)
+        # im = self.bn1_scene(im)
+        # im = self.relu(im)
+        # im = self.maxpool(im)
+        # im = self.layer1_scene(im)
+        # im = self.layer2_scene(im)
+        # im = self.layer3_scene(im)
+        # im = self.layer4_scene(im)
+        # scene_feat = self.layer5_scene(im)
         # print("scene_feat.shape: ", scene_feat.shape) # [48, 1024, 7, 7]
         # attn_weights = torch.ones(attn_weights.shape)/49.0
 
