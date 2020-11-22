@@ -18,8 +18,7 @@ class Bottleneck(nn.Module):
         super(Bottleneck, self).__init__()
         self.conv1 = nn.Conv2d(inplanes, planes, kernel_size=1, bias=False)
         self.bn1 = nn.BatchNorm2d(planes)
-        self.conv2 = nn.Conv2d(planes, planes, kernel_size=3, stride=stride,
-                               padding=1, bias=False)
+        self.conv2 = nn.Conv2d(planes, planes, kernel_size=3, stride=stride, padding=1, bias=False)
         self.bn2 = nn.BatchNorm2d(planes)
         self.conv3 = nn.Conv2d(planes, planes * 4, kernel_size=1, bias=False)
         self.bn3 = nn.BatchNorm2d(planes * 4)
@@ -177,22 +176,22 @@ class ModelSpatial(nn.Module):
         self.avgpool = nn.AvgPool2d(7, stride=1)
 
         # scene pathway
-        self.conv1_scene = nn.Conv2d(4, 64, kernel_size=7, stride=2, padding=3, bias=False)
-        self.bn1_scene = nn.BatchNorm2d(64)
-        self.layer1_scene = self._make_layer_scene(block, 64, layers_scene[0])
-        self.layer2_scene = self._make_layer_scene(block, 128, layers_scene[1], stride=2)
-        self.layer3_scene = self._make_layer_scene(block, 256, layers_scene[2], stride=2)
-        self.layer4_scene = self._make_layer_scene(block, 512, layers_scene[3], stride=2)
-        self.layer5_scene = self._make_layer_scene(block, 256, layers_scene[4], stride=1) # additional to resnet50
+        # self.conv1_scene = nn.Conv2d(4, 64, kernel_size=7, stride=2, padding=3, bias=False)
+        # self.bn1_scene = nn.BatchNorm2d(64)
+        # self.layer1_scene = self._make_layer_scene(block, 64, layers_scene[0])
+        # self.layer2_scene = self._make_layer_scene(block, 128, layers_scene[1], stride=2)
+        # self.layer3_scene = self._make_layer_scene(block, 256, layers_scene[2], stride=2)
+        # self.layer4_scene = self._make_layer_scene(block, 512, layers_scene[3], stride=2)
+        # self.layer5_scene = self._make_layer_scene(block, 256, layers_scene[4], stride=1) # additional to resnet50
 
         # face pathway
-        self.conv1_face = nn.Conv2d(3, 64, kernel_size = 7, stride = 2, padding = 3, bias = False)
-        self.bn1_face = nn.BatchNorm2d(64)
-        self.layer1_face = self._make_layer_face(block, 64, layers_face[0])
-        self.layer2_face = self._make_layer_face(block, 128, layers_face[1], stride=2)
-        self.layer3_face = self._make_layer_face(block, 256, layers_face[2], stride=2)
-        self.layer4_face = self._make_layer_face(block, 512, layers_face[3], stride=2)
-        self.layer5_face = self._make_layer_face(block, 256, layers_face[4], stride=1) # additional to resnet50
+        # self.conv1_face = nn.Conv2d(3, 64, kernel_size = 7, stride = 2, padding = 3, bias = False)
+        # self.bn1_face = nn.BatchNorm2d(64)
+        # self.layer1_face = self._make_layer_face(block, 64, layers_face[0])
+        # self.layer2_face = self._make_layer_face(block, 128, layers_face[1], stride=2)
+        # self.layer3_face = self._make_layer_face(block, 256, layers_face[2], stride=2)
+        # self.layer4_face = self._make_layer_face(block, 512, layers_face[3], stride=2)
+        # self.layer5_face = self._make_layer_face(block, 256, layers_face[4], stride=1) # additional to resnet50
 
         # mobilenetv2
         mbnet_layers = []
@@ -237,37 +236,37 @@ class ModelSpatial(nn.Module):
                 m.weight.data.fill_(1)
                 m.bias.data.zero_()
 
-    def _make_layer_scene(self, block, planes, blocks, stride=1):
-        downsample = None
-        if stride != 1 or self.inplanes_scene != planes * block.expansion:
-            downsample = nn.Sequential(
-                nn.Conv2d(self.inplanes_scene, planes * block.expansion, kernel_size=1, stride=stride, bias=False),
-                nn.BatchNorm2d(planes * block.expansion),
-            )
-
-        layers = []
-        layers.append(block(self.inplanes_scene, planes, stride, downsample))
-        self.inplanes_scene = planes * block.expansion
-        for i in range(1, blocks):
-            layers.append(block(self.inplanes_scene, planes))
-
-        return nn.Sequential(*layers)
-
-    def _make_layer_face(self, block, planes, blocks, stride=1):
-        downsample = None
-        if stride != 1 or self.inplanes_face != planes * block.expansion:
-            downsample = nn.Sequential(
-                nn.Conv2d(self.inplanes_face, planes * block.expansion, kernel_size=1, stride=stride, bias=False),
-                nn.BatchNorm2d(planes * block.expansion),
-            )
-
-        layers = []
-        layers.append(block(self.inplanes_face, planes, stride, downsample))
-        self.inplanes_face = planes * block.expansion
-        for i in range(1, blocks):
-            layers.append(block(self.inplanes_face, planes))
-
-        return nn.Sequential(*layers)
+    # def _make_layer_scene(self, block, planes, blocks, stride=1):
+    #     downsample = None
+    #     if stride != 1 or self.inplanes_scene != planes * block.expansion:
+    #         downsample = nn.Sequential(
+    #             nn.Conv2d(self.inplanes_scene, planes * block.expansion, kernel_size=1, stride=stride, bias=False),
+    #             nn.BatchNorm2d(planes * block.expansion),
+    #         )
+    #
+    #     layers = []
+    #     layers.append(block(self.inplanes_scene, planes, stride, downsample))
+    #     self.inplanes_scene = planes * block.expansion
+    #     for i in range(1, blocks):
+    #         layers.append(block(self.inplanes_scene, planes))
+    #
+    #     return nn.Sequential(*layers)
+    #
+    # def _make_layer_face(self, block, planes, blocks, stride=1):
+    #     downsample = None
+    #     if stride != 1 or self.inplanes_face != planes * block.expansion:
+    #         downsample = nn.Sequential(
+    #             nn.Conv2d(self.inplanes_face, planes * block.expansion, kernel_size=1, stride=stride, bias=False),
+    #             nn.BatchNorm2d(planes * block.expansion),
+    #         )
+    #
+    #     layers = []
+    #     layers.append(block(self.inplanes_face, planes, stride, downsample))
+    #     self.inplanes_face = planes * block.expansion
+    #     for i in range(1, blocks):
+    #         layers.append(block(self.inplanes_face, planes))
+    #
+    #     return nn.Sequential(*layers)
 
     def forward(self, images, head, face):
         # print("images.shape: ", images.shape) # [48, 3, 224 ,244]
