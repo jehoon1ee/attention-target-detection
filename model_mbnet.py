@@ -270,13 +270,13 @@ class ModelSpatial(nn.Module):
         return nn.Sequential(*layers)
 
     def forward(self, images, head, face):
-        print("images.shape: ", images.shape) # [48, 3, 224 ,244]
-        print("head.shape: ", head.shape) # [48, 1, 224, 224]
-        print("face.shape: ", face.shape) # [48, 3, 224, 224]
+        # print("images.shape: ", images.shape) # [48, 3, 224 ,244]
+        # print("head.shape: ", head.shape) # [48, 1, 224, 224]
+        # print("face.shape: ", face.shape) # [48, 3, 224, 224]
 
         # reduce head channel size by max pooling: (N, 1, 224, 224) -> (N, 1, 28, 28)
         head_reduced = self.maxpool(self.maxpool(self.maxpool(head))).view(-1, 784)
-        print("head_reduced.shape: ", head_reduced.shape) # [48, 784]
+        # print("head_reduced.shape: ", head_reduced.shape) # [48, 784]
 
         # Head Conv mbnet
         face_feat = self.mbnet(face)
@@ -291,11 +291,11 @@ class ModelSpatial(nn.Module):
         # face = self.layer3_face(face)
         # face = self.layer4_face(face)
         # face_feat = self.layer5_face(face)
-        print("face_feat.shape: ", face_feat.shape) # [48, 1024, 7, 7]
+        # print("face_feat.shape: ", face_feat.shape) # [48, 1024, 7, 7]
 
         # reduce face feature size by avg pooling: (N, 1024, 7, 7) -> (N, 1024, 1, 1)
         face_feat_reduced = self.avgpool(face_feat).view(-1, 1024)
-        print("face_feat_reduced.shape: ", face_feat_reduced.shape) # [48, 1024, 7, 7]
+        # print("face_feat_reduced.shape: ", face_feat_reduced.shape) # [48, 1024, 7, 7]
 
         # get and reshape attention weights such that it can be multiplied with scene feature map
         attn_weights = self.attn(torch.cat((head_reduced, face_feat_reduced), 1))
@@ -316,32 +316,32 @@ class ModelSpatial(nn.Module):
         # im = self.layer3_scene(im)
         # im = self.layer4_scene(im)
         # scene_feat = self.layer5_scene(im)
-        print("scene_feat.shape: ", scene_feat.shape) # [48, 1024, 7, 7]
+        # print("scene_feat.shape: ", scene_feat.shape) # [48, 1024, 7, 7]
         # attn_weights = torch.ones(attn_weights.shape)/49.0
 
         attn_applied_scene_feat = torch.mul(attn_weights, scene_feat) # (N, 1, 7, 7) # applying attention weights on scene feat
-        print("attn_applied_scene_feat.shape: ", attn_applied_scene_feat.shape)
+        # print("attn_applied_scene_feat.shape: ", attn_applied_scene_feat.shape)
 
         scene_face_feat = torch.cat((attn_applied_scene_feat, face_feat), 1)
-        print("scene_face_feat.shape: ", scene_face_feat.shape)
+        # print("scene_face_feat.shape: ", scene_face_feat.shape)
 
         # In Frame?: scene + face feat -> in/out
         encoding_inout = self.compress_conv1_inout(scene_face_feat)
-        print("[1] encoding_inout.shape: ", encoding_inout.shape)
+        # print("[1] encoding_inout.shape: ", encoding_inout.shape)
         encoding_inout = self.compress_bn1_inout(encoding_inout)
-        print("[2] encoding_inout.shape: ", encoding_inout.shape)
+        # print("[2] encoding_inout.shape: ", encoding_inout.shape)
         encoding_inout = self.relu(encoding_inout)
-        print("[3] encoding_inout.shape: ", encoding_inout.shape)
+        # print("[3] encoding_inout.shape: ", encoding_inout.shape)
         encoding_inout = self.compress_conv2_inout(encoding_inout)
-        print("[4] encoding_inout.shape: ", encoding_inout.shape)
+        # print("[4] encoding_inout.shape: ", encoding_inout.shape)
         encoding_inout = self.compress_bn2_inout(encoding_inout)
-        print("[5] encoding_inout.shape: ", encoding_inout.shape)
+        # print("[5] encoding_inout.shape: ", encoding_inout.shape)
         encoding_inout = self.relu(encoding_inout)
-        print("[6] encoding_inout.shape: ", encoding_inout.shape)
+        # print("[6] encoding_inout.shape: ", encoding_inout.shape)
         encoding_inout = encoding_inout.view(-1, 49)
-        print("[7] encoding_inout.shape: ", encoding_inout.shape)
+        # print("[7] encoding_inout.shape: ", encoding_inout.shape)
         encoding_inout = self.fc_inout(encoding_inout)
-        print("[8] encoding_inout: ", encoding_inout)
+        # print("[8] encoding_inout: ", encoding_inout)
 
         # Encode: scene + face feat -> encoding -> decoding
         encoding = self.compress_conv1(scene_face_feat)

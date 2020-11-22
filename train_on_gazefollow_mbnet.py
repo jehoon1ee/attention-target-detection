@@ -78,11 +78,11 @@ def train():
     print("Loading init_weights ", args.init_weights)
     model = ModelSpatial()
     model.cuda().to(device)
-    # model_dict = model.state_dict()
-    # pretrained_dict = torch.load(args.init_weights)
-    # pretrained_dict = pretrained_dict['model']
-    # model_dict.update(pretrained_dict)
-    # model.load_state_dict(model_dict)
+    model_dict = model.state_dict()
+    pretrained_dict = torch.load(args.init_weights)
+    pretrained_dict = pretrained_dict['model']
+    model_dict.update(pretrained_dict)
+    model.load_state_dict(model_dict)
 
     # Loss functions
     mse_loss = nn.MSELoss(reduce=False) # not reducing in order to ignore outside cases
@@ -134,6 +134,8 @@ def train():
             # [2] cross entropy loss for in vs out
             # print("inout_pred: ", inout_pred)
             Xent_loss = bcelogit_loss(inout_pred.squeeze(), gaze_inside.squeeze()) * 100
+            print("inout_pred.squeeze(): ", inout_pred.squeeze())
+            print("gaze_inside.squeeze(): ", gaze_inside.squeeze())
 
             total_loss = l2_loss + Xent_loss
             # NOTE: summed loss is used to train the main model.
