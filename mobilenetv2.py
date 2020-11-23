@@ -106,7 +106,7 @@ class MobileNetV2(nn.Module):
         # building last several layers
         output_channel = 1280
         self.conv = conv_1x1_bn(input_channel, 1280)
-        self.fitsize = nn.Conv2d(1280, 1024, 1, 1, 0, bias=False)
+        self.fitsize = nn.Conv2d(1280, 1024, 3, 1, 1, bias=False)
 
         self._initialize_weights()
 

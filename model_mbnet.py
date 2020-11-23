@@ -183,7 +183,7 @@ class ModelSpatial(nn.Module):
         self.mbnet_head_conv = nn.Sequential(*mbnet_head_layers)
 
         # mobilenetv2: scene conv
-        self.bef_scene_conv = nn.Conv2d(4, 3, 1, 1, 0, bias=False)
+        self.bef_scene_conv = nn.Conv2d(4, 3, kernel_size=7, stride=1, padding=3, bias=False)
         self.bef_scene_conv_bn = nn.BatchNorm2d(3)
 
         mbnet_scene = MobileNetV2(ch_in=3)
