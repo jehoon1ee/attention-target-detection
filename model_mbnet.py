@@ -5,7 +5,7 @@ from torch.nn.utils.rnn import pack_padded_sequence, PackedSequence
 import math
 from lib.pytorch_convolutional_rnn import convolutional_rnn
 import numpy as np
-import mobilenetv2
+from mobilenetv2 import MobileNetV2
 
 # pytorch profiler
 import torchvision.models as models
