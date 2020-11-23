@@ -183,7 +183,7 @@ class ModelSpatial(nn.Module):
         self.mbnet_head_conv = nn.Sequential(*mbnet_head_layers)
 
         # mobilenetv2: scene conv
-        mbnet_scene = MobileNetV2(ch_in=4)
+        mbnet_scene = MobileNetV2(ch_in=3)
         mbnet_scene_dict = mbnet_scene.state_dict()
         mbnet_scene_pretrained = torch.load('mobilenetv2_init_weights.pth')
         mbnet_scene_pretrained = {k: v for k, v in mbnet_scene_pretrained.items() if k in mbnet_scene_dict}
@@ -193,6 +193,7 @@ class ModelSpatial(nn.Module):
         mbnet_scene_layers = []
         mbnet_scene_layers.append(mbnet_scene)
         self.mbnet_scene_conv = nn.Sequential(*mbnet_scene_layers)
+        self.bef_scene_conv = nn.Conv2d(4, 3, 1, 1, 0, bias=False)
 
         # attention
         self.attn = nn.Linear(1808, 1*7*7)
@@ -254,6 +255,7 @@ class ModelSpatial(nn.Module):
 
         # Scene Conv
         im = torch.cat((images, head), dim=1)
+        scene_feat = self.bef_scene_conv(im)
         scene_feat = self.mbnet_scene_conv(im)
 
         # print("scene_feat.shape: ", scene_feat.shape) # [48, 1024, 7, 7]
