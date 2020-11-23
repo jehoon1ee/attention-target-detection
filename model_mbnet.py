@@ -184,7 +184,11 @@ class ModelSpatial(nn.Module):
 
         # mobilenetv2: scene conv
         mbnet_scene = MobileNetV2(ch_in=4)
-        mbnet_scene.load_state_dict(torch.load('mobilenetv2_init_weights.pth'))
+        mbnet_scene_dict = mbnet_scene.state_dict()
+        mbnet_scene_pretrained = torch.load('mobilenetv2_init_weights.pth')
+        mbnet_scene_pretrained = {k: v for k, v in mbnet_scene_pretrained.items() if k in mbnet_scene_dict}
+        mbnet_scene_dict.update(mbnet_scene_pretrained)
+        mbnet_scene.load_state_dict(mbnet_scene_dict)
 
         mbnet_scene_layers = []
         mbnet_scene_layers.append(mbnet_scene)
