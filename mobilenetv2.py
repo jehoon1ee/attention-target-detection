@@ -104,14 +104,16 @@ class MobileNetV2(nn.Module):
         self.features = nn.Sequential(*layers)
 
         # building last several layers
-        output_channel = 1024
-        self.conv = conv_1x1_bn(input_channel, output_channel)
+        output_channel = 1280
+        self.conv = conv_1x1_bn(input_channel, 1280)
+        self.fitsize = nn.Linear(1280, 1024)
 
         self._initialize_weights()
 
     def forward(self, x):
         x = self.features(x)
         x = self.conv(x)
+        x = self.fitsize(x)
         return x
 
     def _initialize_weights(self):
