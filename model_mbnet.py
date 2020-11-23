@@ -258,8 +258,8 @@ class ModelSpatial(nn.Module):
         # Scene Conv
         im = torch.cat((images, head), dim=1)
         scene_feat = self.bef_scene_conv(im)
-        scene_feat = self.bef_scene_conv_bn(im)
-        scene_feat = self.mbnet_scene_conv(im)
+        scene_feat = self.bef_scene_conv_bn(scene_feat)
+        scene_feat = self.mbnet_scene_conv(scene_feat)
 
         # print("scene_feat.shape: ", scene_feat.shape) # [48, 1024, 7, 7]
         # attn_weights = torch.ones(attn_weights.shape)/49.0
