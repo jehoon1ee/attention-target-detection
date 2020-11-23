@@ -172,7 +172,11 @@ class ModelSpatial(nn.Module):
 
         # mobilenetv2: head conv
         mbnet_head = MobileNetV2(ch_in=3)
-        mbnet_head.load_state_dict(torch.load('mobilenetv2_init_weights.pth'))
+        mbnet_head_dict = mbnet_head.state_dict()
+        mbnet_head_pretrained = torch.load('mobilenetv2_init_weights.pth')
+        mbnet_head_pretrained = {k: v for k, v in mbnet_head_pretrained.items() if k in mbnet_head_dict}
+        mbnet_head_dict.update(mbnet_head_pretrained)
+        mbnet_head.load_state_dict(mbnet_head_dict)
 
         mbnet_head_layers = []
         mbnet_head_layers.append(mbnet_head)
