@@ -5,6 +5,7 @@ from torch.nn.utils.rnn import pack_padded_sequence, PackedSequence
 import math
 from lib.pytorch_convolutional_rnn import convolutional_rnn
 import numpy as np
+from mobilenetv2 import mobilenetv2
 
 # pytorch profiler
 import torchvision.models as models
@@ -48,120 +49,114 @@ class Bottleneck(nn.Module):
 
         return out
 
-##################################################################
-##################################################################
-##################################################################
 
-def dwise_conv(ch_in, stride=1):
-    return (
-        nn.Sequential(
-            #depthwise
-            nn.Conv2d(ch_in, ch_in, kernel_size=3, stride=stride, padding=1, groups=ch_in, bias=False),
-            nn.BatchNorm2d(ch_in),
-            nn.ReLU6(inplace=True),
-        )
-    )
+# def dwise_conv(ch_in, stride=1):
+#     return (
+#         nn.Sequential(
+#             #depthwise
+#             nn.Conv2d(ch_in, ch_in, kernel_size=3, stride=stride, padding=1, groups=ch_in, bias=False),
+#             nn.BatchNorm2d(ch_in),
+#             nn.ReLU6(inplace=True),
+#         )
+#     )
+#
+# def conv1x1(ch_in, ch_out):
+#     return (
+#         nn.Sequential(
+#             nn.Conv2d(ch_in, ch_out, kernel_size=1, stride=1, padding=0, bias=False),
+#             nn.BatchNorm2d(ch_out),
+#             nn.ReLU6(inplace=True)
+#         )
+#     )
+#
+# def conv1x1_nonlinear(ch_in, ch_out):
+#     return (
+#         nn.Sequential(
+#             nn.Conv2d(ch_in, ch_out, kernel_size=1, stride=1, padding=0, bias=False),
+#             nn.BatchNorm2d(ch_out)
+#         )
+#     )
+#
+# def conv3x3(ch_in, ch_out, stride):
+#     return (
+#         nn.Sequential(
+#             nn.Conv2d(ch_in, ch_out, kernel_size=3, stride=stride, padding=1, bias=False),
+#             nn.BatchNorm2d(ch_out),
+#             nn.ReLU6(inplace=True)
+#         )
+#     )
+#
+# class InvertedBlock(nn.Module):
+#     def __init__(self, ch_in, ch_out, expand_ratio, stride):
+#         super(InvertedBlock, self).__init__()
+#
+#         self.stride = stride
+#         assert stride in [1,2]
+#         hidden_dim = ch_in * expand_ratio
+#         self.use_res_connect = self.stride == 1 and ch_in == ch_out
+#
+#         layers = []
+#         if expand_ratio != 1:
+#             layers.append(conv1x1(ch_in, hidden_dim))
+#         layers.extend([
+#             dwise_conv(hidden_dim, stride=stride), #dw
+#             conv1x1_nonlinear(hidden_dim, ch_out) #pw
+#         ])
+#
+#         self.layers = nn.Sequential(*layers)
+#
+#     def forward(self, x):
+#         if self.use_res_connect:
+#             return x + self.layers(x)
+#         else:
+#             return self.layers(x)
+#
+# class MobileNetV2(nn.Module):
+#     def __init__(self, ch_in=3, n_classes=1000):
+#         super(MobileNetV2, self).__init__()
+#
+#         self.configs=[
+#             # t, c, n, s
+#             [1, 16, 1, 1],
+#             [6, 24, 2, 2],
+#             [6, 32, 3, 2],
+#             [6, 64, 4, 2],
+#             [6, 96, 3, 1],
+#             [6, 160, 3, 2],
+#             [6, 320, 1, 1]
+#         ]
+#
+#         self.stem_conv = conv3x3(ch_in, 32, stride=2)
+#
+#         layers = []
+#         input_channel = 32
+#         for t, c, n, s in self.configs:
+#             for i in range(n):
+#                 stride = s if i == 0 else 1
+#                 layers.append(InvertedBlock(ch_in=input_channel, ch_out=c, expand_ratio=t, stride=stride))
+#                 input_channel = c
+#
+#         self.layers = nn.Sequential(*layers)
+#         self.last_conv = conv1x1(input_channel, 1024)
+#         self._initialize_weights()
+#
+#     def forward(self, x):
+#         x = self.stem_conv(x)
+#         x = self.layers(x)
+#         x = self.last_conv(x)
+#         return x
+#
+#     def _initialize_weights(self):
+#         for m in self.modules():
+#             if isinstance(m, nn.Conv2d):
+#                 n = m.kernel_size[0] * m.kernel_size[1] * m.out_channels
+#                 m.weight.data.normal_(0, math.sqrt(2. / n))
+#                 if m.bias is not None:
+#                     m.bias.data.zero_()
+#             elif isinstance(m, nn.BatchNorm2d):
+#                 m.weight.data.fill_(1)
+#                 m.bias.data.zero_()
 
-def conv1x1(ch_in, ch_out):
-    return (
-        nn.Sequential(
-            nn.Conv2d(ch_in, ch_out, kernel_size=1, stride=1, padding=0, bias=False),
-            nn.BatchNorm2d(ch_out),
-            nn.ReLU6(inplace=True)
-        )
-    )
-
-def conv1x1_nonlinear(ch_in, ch_out):
-    return (
-        nn.Sequential(
-            nn.Conv2d(ch_in, ch_out, kernel_size=1, stride=1, padding=0, bias=False),
-            nn.BatchNorm2d(ch_out)
-        )
-    )
-
-def conv3x3(ch_in, ch_out, stride):
-    return (
-        nn.Sequential(
-            nn.Conv2d(ch_in, ch_out, kernel_size=3, stride=stride, padding=1, bias=False),
-            nn.BatchNorm2d(ch_out),
-            nn.ReLU6(inplace=True)
-        )
-    )
-
-class InvertedBlock(nn.Module):
-    def __init__(self, ch_in, ch_out, expand_ratio, stride):
-        super(InvertedBlock, self).__init__()
-
-        self.stride = stride
-        assert stride in [1,2]
-        hidden_dim = ch_in * expand_ratio
-        self.use_res_connect = self.stride == 1 and ch_in == ch_out
-
-        layers = []
-        if expand_ratio != 1:
-            layers.append(conv1x1(ch_in, hidden_dim))
-        layers.extend([
-            dwise_conv(hidden_dim, stride=stride), #dw
-            conv1x1_nonlinear(hidden_dim, ch_out) #pw
-        ])
-
-        self.layers = nn.Sequential(*layers)
-
-    def forward(self, x):
-        if self.use_res_connect:
-            return x + self.layers(x)
-        else:
-            return self.layers(x)
-
-class MobileNetV2(nn.Module):
-    def __init__(self, ch_in=3, n_classes=1000):
-        super(MobileNetV2, self).__init__()
-
-        self.configs=[
-            # t, c, n, s
-            [1, 16, 1, 1],
-            [6, 24, 2, 2],
-            [6, 32, 3, 2],
-            [6, 64, 4, 2],
-            [6, 96, 3, 1],
-            [6, 160, 3, 2],
-            [6, 320, 1, 1]
-        ]
-
-        self.stem_conv = conv3x3(ch_in, 32, stride=2)
-
-        layers = []
-        input_channel = 32
-        for t, c, n, s in self.configs:
-            for i in range(n):
-                stride = s if i == 0 else 1
-                layers.append(InvertedBlock(ch_in=input_channel, ch_out=c, expand_ratio=t, stride=stride))
-                input_channel = c
-
-        self.layers = nn.Sequential(*layers)
-        self.last_conv = conv1x1(input_channel, 1024)
-        self._initialize_weights()
-
-    def forward(self, x):
-        x = self.stem_conv(x)
-        x = self.layers(x)
-        x = self.last_conv(x)
-        return x
-
-    def _initialize_weights(self):
-        for m in self.modules():
-            if isinstance(m, nn.Conv2d):
-                n = m.kernel_size[0] * m.kernel_size[1] * m.out_channels
-                m.weight.data.normal_(0, math.sqrt(2. / n))
-                if m.bias is not None:
-                    m.bias.data.zero_()
-            elif isinstance(m, nn.BatchNorm2d):
-                m.weight.data.fill_(1)
-                m.bias.data.zero_()
-
-##################################################################
-##################################################################
-##################################################################
 
 class ModelSpatial(nn.Module):
     # Define a ResNet 50-ish arch
@@ -175,32 +170,21 @@ class ModelSpatial(nn.Module):
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
         self.avgpool = nn.AvgPool2d(7, stride=1)
 
-        # scene pathway
-        # self.conv1_scene = nn.Conv2d(4, 64, kernel_size=7, stride=2, padding=3, bias=False)
-        # self.bn1_scene = nn.BatchNorm2d(64)
-        # self.layer1_scene = self._make_layer_scene(block, 64, layers_scene[0])
-        # self.layer2_scene = self._make_layer_scene(block, 128, layers_scene[1], stride=2)
-        # self.layer3_scene = self._make_layer_scene(block, 256, layers_scene[2], stride=2)
-        # self.layer4_scene = self._make_layer_scene(block, 512, layers_scene[3], stride=2)
-        # self.layer5_scene = self._make_layer_scene(block, 256, layers_scene[4], stride=1) # additional to resnet50
+        # mobilenetv2: head conv
+        mbnet_head = MobileNetV2(ch_in=3)
+        mbnet_head.load_state_dict(torch.load('mobilenetv2_init_weights.pth'))
 
-        # face pathway
-        # self.conv1_face = nn.Conv2d(3, 64, kernel_size = 7, stride = 2, padding = 3, bias = False)
-        # self.bn1_face = nn.BatchNorm2d(64)
-        # self.layer1_face = self._make_layer_face(block, 64, layers_face[0])
-        # self.layer2_face = self._make_layer_face(block, 128, layers_face[1], stride=2)
-        # self.layer3_face = self._make_layer_face(block, 256, layers_face[2], stride=2)
-        # self.layer4_face = self._make_layer_face(block, 512, layers_face[3], stride=2)
-        # self.layer5_face = self._make_layer_face(block, 256, layers_face[4], stride=1) # additional to resnet50
+        mbnet_head_layers = []
+        mbnet_head_layers.append(mbnet_head)
+        self.mbnet_head_conv = nn.Sequential(*mbnet_head_layers)
 
-        # mobilenetv2
-        mbnet_layers = []
-        mbnet_layers.append(MobileNetV2(ch_in=3))
-        self.mbnet = nn.Sequential(*mbnet_layers)
+        # mobilenetv2: scene conv
+        mbnet_scene = MobileNetV2(ch_in=4)
+        mbnet_scene.load_state_dict(torch.load('mobilenetv2_init_weights.pth'))
 
-        mbnet2_layers = []
-        mbnet2_layers.append(MobileNetV2(ch_in=4))
-        self.mbnet2 = nn.Sequential(*mbnet2_layers)
+        mbnet_scene_layers = []
+        mbnet_scene_layers.append(mbnet_scene)
+        self.mbnet_scene_conv = nn.Sequential(*mbnet_scene_layers)
 
         # attention
         self.attn = nn.Linear(1808, 1*7*7)
@@ -236,38 +220,6 @@ class ModelSpatial(nn.Module):
                 m.weight.data.fill_(1)
                 m.bias.data.zero_()
 
-    # def _make_layer_scene(self, block, planes, blocks, stride=1):
-    #     downsample = None
-    #     if stride != 1 or self.inplanes_scene != planes * block.expansion:
-    #         downsample = nn.Sequential(
-    #             nn.Conv2d(self.inplanes_scene, planes * block.expansion, kernel_size=1, stride=stride, bias=False),
-    #             nn.BatchNorm2d(planes * block.expansion),
-    #         )
-    #
-    #     layers = []
-    #     layers.append(block(self.inplanes_scene, planes, stride, downsample))
-    #     self.inplanes_scene = planes * block.expansion
-    #     for i in range(1, blocks):
-    #         layers.append(block(self.inplanes_scene, planes))
-    #
-    #     return nn.Sequential(*layers)
-    #
-    # def _make_layer_face(self, block, planes, blocks, stride=1):
-    #     downsample = None
-    #     if stride != 1 or self.inplanes_face != planes * block.expansion:
-    #         downsample = nn.Sequential(
-    #             nn.Conv2d(self.inplanes_face, planes * block.expansion, kernel_size=1, stride=stride, bias=False),
-    #             nn.BatchNorm2d(planes * block.expansion),
-    #         )
-    #
-    #     layers = []
-    #     layers.append(block(self.inplanes_face, planes, stride, downsample))
-    #     self.inplanes_face = planes * block.expansion
-    #     for i in range(1, blocks):
-    #         layers.append(block(self.inplanes_face, planes))
-    #
-    #     return nn.Sequential(*layers)
-
     def forward(self, images, head, face):
         # print("images.shape: ", images.shape) # [48, 3, 224 ,244]
         # print("head.shape: ", head.shape) # [48, 1, 224, 224]
@@ -278,18 +230,8 @@ class ModelSpatial(nn.Module):
         # print("head_reduced.shape: ", head_reduced.shape) # [48, 784]
 
         # Head Conv mbnet
-        face_feat = self.mbnet(face)
+        face_feat = self.mbnet_head_conv(face)
 
-        # Head Conv
-        # face = self.conv1_face(face)
-        # face = self.bn1_face(face)
-        # face = self.relu(face)
-        # face = self.maxpool(face)
-        # face = self.layer1_face(face)
-        # face = self.layer2_face(face)
-        # face = self.layer3_face(face)
-        # face = self.layer4_face(face)
-        # face_feat = self.layer5_face(face)
         # print("face_feat.shape: ", face_feat.shape) # [48, 1024, 7, 7]
 
         # reduce face feature size by avg pooling: (N, 1024, 7, 7) -> (N, 1024, 1, 1)
@@ -304,17 +246,8 @@ class ModelSpatial(nn.Module):
 
         # Scene Conv
         im = torch.cat((images, head), dim=1)
-        scene_feat = self.mbnet2(im)
+        scene_feat = self.mbnet_scene_conv(im)
 
-        # im = self.conv1_scene(im)
-        # im = self.bn1_scene(im)
-        # im = self.relu(im)
-        # im = self.maxpool(im)
-        # im = self.layer1_scene(im)
-        # im = self.layer2_scene(im)
-        # im = self.layer3_scene(im)
-        # im = self.layer4_scene(im)
-        # scene_feat = self.layer5_scene(im)
         # print("scene_feat.shape: ", scene_feat.shape) # [48, 1024, 7, 7]
         # attn_weights = torch.ones(attn_weights.shape)/49.0
 

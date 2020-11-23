@@ -3,6 +3,7 @@ from torchvision import transforms
 import torch.nn as nn
 
 from model_mbnet import ModelSpatial
+from mobilenetv2 import mobilenetv2
 from dataset import GazeFollow
 from config import *
 from utils import imutils, evaluation
@@ -23,10 +24,10 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--device", type=int, default=0, help="gpu id")
-parser.add_argument("--init_weights", type=str, default="mbnet_weights.pt", help="initial weights")
+parser.add_argument("--init_weights", type=str, default="mobilenetv2_init_weights.pth", help="initial weights")
 parser.add_argument("--lr", type=float, default=2.5e-4, help="learning rate")
 parser.add_argument("--batch_size", type=int, default=48, help="batch size")
-parser.add_argument("--epochs", type=int, default=50, help="number of epochs")
+parser.add_argument("--epochs", type=int, default=70, help="number of epochs")
 parser.add_argument("--print_every", type=int, default=100, help="print every ___ iterations")
 parser.add_argument("--eval_every", type=int, default=1000, help="evaluate every ___ iterations")
 parser.add_argument("--save_every", type=int, default=1, help="save every ___ epochs")
@@ -75,7 +76,7 @@ def train():
 
     # Load model
     print("Constructing model")
-    print("Loading init_weights ", args.init_weights)
+    # print("Loading init_weights ", args.init_weights)
     model = ModelSpatial()
     model.cuda().to(device)
     # model_dict = model.state_dict()

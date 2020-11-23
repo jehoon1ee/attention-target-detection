@@ -23,7 +23,7 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--device", type=int, default=0, help="gpu id")
-parser.add_argument("--init_weights", type=str, default="resnet_weights.pt", help="initial weights")
+parser.add_argument("--init_weights", type=str, default="initial_weights_for_spatial_training.pt", help="initial weights")
 parser.add_argument("--lr", type=float, default=2.5e-4, help="learning rate")
 parser.add_argument("--batch_size", type=int, default=48, help="batch size")
 parser.add_argument("--epochs", type=int, default=50, help="number of epochs")
@@ -78,11 +78,11 @@ def train():
     print("Loading init_weights ", args.init_weights)
     model = ModelSpatial()
     model.cuda().to(device)
-    # model_dict = model.state_dict()
-    # pretrained_dict = torch.load(args.init_weights)
-    # pretrained_dict = pretrained_dict['model']
-    # model_dict.update(pretrained_dict)
-    # model.load_state_dict(model_dict)
+    model_dict = model.state_dict()
+    pretrained_dict = torch.load(args.init_weights)
+    pretrained_dict = pretrained_dict['model']
+    model_dict.update(pretrained_dict)
+    model.load_state_dict(model_dict)
 
     # for name, param in model.named_parameters():
     #     if param.requires_grad:
