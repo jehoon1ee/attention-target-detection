@@ -27,7 +27,7 @@ parser.add_argument("--init_weights", type=str, default="initial_weights_for_spa
 parser.add_argument("--lr", type=float, default=2.5e-4, help="learning rate")
 parser.add_argument("--batch_size", type=int, default=48, help="batch size")
 parser.add_argument("--epochs", type=int, default=50, help="number of epochs")
-parser.add_argument("--print_every", type=int, default=50, help="print every ___ iterations")
+parser.add_argument("--print_every", type=int, default=25, help="print every ___ iterations")
 parser.add_argument("--eval_every", type=int, default=1000, help="evaluate every ___ iterations")
 parser.add_argument("--save_every", type=int, default=1, help="save every ___ epochs")
 parser.add_argument("--log_dir", type=str, default="logs", help="directory to save log files")
