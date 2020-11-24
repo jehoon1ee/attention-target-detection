@@ -282,21 +282,16 @@ class ModelSpatial(nn.Module):
 
         # In Frame?: scene + face feat -> in/out
         encoding_inout = self.compress_conv1_inout(scene_face_feat)
-        # print("[1] encoding_inout.shape: ", encoding_inout.shape)
         encoding_inout = self.compress_bn1_inout(encoding_inout)
-        # print("[2] encoding_inout.shape: ", encoding_inout.shape)
         encoding_inout = self.relu(encoding_inout)
-        # print("[3] encoding_inout.shape: ", encoding_inout.shape)
         encoding_inout = self.compress_conv2_inout(encoding_inout)
-        # print("[4] encoding_inout.shape: ", encoding_inout.shape)
         encoding_inout = self.compress_bn2_inout(encoding_inout)
-        # print("[5] encoding_inout.shape: ", encoding_inout.shape)
         encoding_inout = self.relu(encoding_inout)
-        # print("[6] encoding_inout.shape: ", encoding_inout.shape)
+        encoding_inout = self.compress_conv3_inout(encoding_inout)
+        encoding_inout = self.compress_bn3_inout(encoding_inout)
+        encoding_inout = self.relu(encoding_inout)
         encoding_inout = encoding_inout.view(-1, 49)
-        # print("[7] encoding_inout.shape: ", encoding_inout.shape)
         encoding_inout = self.fc_inout(encoding_inout)
-        # print("[8] encoding_inout: ", encoding_inout)
 
         # Encode: scene + face feat -> encoding -> decoding
         encoding = self.compress_conv1(scene_face_feat)
@@ -304,9 +299,6 @@ class ModelSpatial(nn.Module):
         encoding = self.relu(encoding)
         encoding = self.compress_conv2(encoding)
         encoding = self.compress_bn2(encoding)
-        encoding = self.relu(encoding)
-        encoding = self.compress_conv3(encoding)
-        encoding = self.compress_bn3(encoding)
         encoding = self.relu(encoding)
 
         # Decode
