@@ -172,11 +172,11 @@ class ModelSpatial(nn.Module):
 
         # mobilenetv2: head conv
         mbnet_head = MobileNetV2(ch_in=3)
-        mbnet_head_dict = mbnet_head.state_dict()
-        mbnet_head_pretrained = torch.load('mobilenetv2_init_weights.pth')
-        mbnet_head_pretrained = {k: v for k, v in mbnet_head_pretrained.items() if k in mbnet_head_dict}
-        mbnet_head_dict.update(mbnet_head_pretrained)
-        mbnet_head.load_state_dict(mbnet_head_dict)
+        # mbnet_head_dict = mbnet_head.state_dict()
+        # mbnet_head_pretrained = torch.load('mobilenetv2_init_weights.pth')
+        # mbnet_head_pretrained = {k: v for k, v in mbnet_head_pretrained.items() if k in mbnet_head_dict}
+        # mbnet_head_dict.update(mbnet_head_pretrained)
+        # mbnet_head.load_state_dict(mbnet_head_dict)
 
         mbnet_head_layers = []
         mbnet_head_layers.append(mbnet_head)
@@ -187,11 +187,11 @@ class ModelSpatial(nn.Module):
         self.bef_scene_conv_bn = nn.BatchNorm2d(3)
 
         mbnet_scene = MobileNetV2(ch_in=3)
-        mbnet_scene_dict = mbnet_scene.state_dict()
-        mbnet_scene_pretrained = torch.load('mobilenetv2_init_weights.pth')
-        mbnet_scene_pretrained = {k: v for k, v in mbnet_scene_pretrained.items() if k in mbnet_scene_dict}
-        mbnet_scene_dict.update(mbnet_scene_pretrained)
-        mbnet_scene.load_state_dict(mbnet_scene_dict)
+        # mbnet_scene_dict = mbnet_scene.state_dict()
+        # mbnet_scene_pretrained = torch.load('mobilenetv2_init_weights.pth')
+        # mbnet_scene_pretrained = {k: v for k, v in mbnet_scene_pretrained.items() if k in mbnet_scene_dict}
+        # mbnet_scene_dict.update(mbnet_scene_pretrained)
+        # mbnet_scene.load_state_dict(mbnet_scene_dict)
 
         mbnet_scene_layers = []
         mbnet_scene_layers.append(mbnet_scene)

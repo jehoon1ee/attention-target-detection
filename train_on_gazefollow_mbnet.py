@@ -138,7 +138,7 @@ def train():
 
             # [2] cross entropy loss for in vs out
             # print("inout_pred: ", inout_pred)
-            Xent_loss = bcelogit_loss(inout_pred.squeeze(), gaze_inside.squeeze()) * 100
+            Xent_loss = bcelogit_loss(inout_pred.squeeze(), gaze_inside.squeeze()) * 300
             # print("inout_pred.squeeze(): ", inout_pred.squeeze())
             # print("gaze_inside.squeeze(): ", gaze_inside.squeeze())
 
