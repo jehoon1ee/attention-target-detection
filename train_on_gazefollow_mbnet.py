@@ -142,7 +142,8 @@ def train():
             # print("inout_pred.squeeze(): ", inout_pred.squeeze())
             # print("gaze_inside.squeeze(): ", gaze_inside.squeeze())
 
-            total_loss = l2_loss + Xent_loss
+            # total_loss = l2_loss + Xent_loss
+            total_loss = Xent_loss
             # NOTE: summed loss is used to train the main model.
             # l2_loss is used to get SOTA on GazeFollow benchmark.
             total_loss.backward() # loss accumulation

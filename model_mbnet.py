@@ -50,112 +50,112 @@ class Bottleneck(nn.Module):
         return out
 
 
-# def dwise_conv(ch_in, stride=1):
-#     return (
-#         nn.Sequential(
-#             #depthwise
-#             nn.Conv2d(ch_in, ch_in, kernel_size=3, stride=stride, padding=1, groups=ch_in, bias=False),
-#             nn.BatchNorm2d(ch_in),
-#             nn.ReLU6(inplace=True),
-#         )
-#     )
-#
-# def conv1x1(ch_in, ch_out):
-#     return (
-#         nn.Sequential(
-#             nn.Conv2d(ch_in, ch_out, kernel_size=1, stride=1, padding=0, bias=False),
-#             nn.BatchNorm2d(ch_out),
-#             nn.ReLU6(inplace=True)
-#         )
-#     )
-#
-# def conv1x1_nonlinear(ch_in, ch_out):
-#     return (
-#         nn.Sequential(
-#             nn.Conv2d(ch_in, ch_out, kernel_size=1, stride=1, padding=0, bias=False),
-#             nn.BatchNorm2d(ch_out)
-#         )
-#     )
-#
-# def conv3x3(ch_in, ch_out, stride):
-#     return (
-#         nn.Sequential(
-#             nn.Conv2d(ch_in, ch_out, kernel_size=3, stride=stride, padding=1, bias=False),
-#             nn.BatchNorm2d(ch_out),
-#             nn.ReLU6(inplace=True)
-#         )
-#     )
-#
-# class InvertedBlock(nn.Module):
-#     def __init__(self, ch_in, ch_out, expand_ratio, stride):
-#         super(InvertedBlock, self).__init__()
-#
-#         self.stride = stride
-#         assert stride in [1,2]
-#         hidden_dim = ch_in * expand_ratio
-#         self.use_res_connect = self.stride == 1 and ch_in == ch_out
-#
-#         layers = []
-#         if expand_ratio != 1:
-#             layers.append(conv1x1(ch_in, hidden_dim))
-#         layers.extend([
-#             dwise_conv(hidden_dim, stride=stride), #dw
-#             conv1x1_nonlinear(hidden_dim, ch_out) #pw
-#         ])
-#
-#         self.layers = nn.Sequential(*layers)
-#
-#     def forward(self, x):
-#         if self.use_res_connect:
-#             return x + self.layers(x)
-#         else:
-#             return self.layers(x)
-#
-# class MobileNetV2(nn.Module):
-#     def __init__(self, ch_in=3, n_classes=1000):
-#         super(MobileNetV2, self).__init__()
-#
-#         self.configs=[
-#             # t, c, n, s
-#             [1, 16, 1, 1],
-#             [6, 24, 2, 2],
-#             [6, 32, 3, 2],
-#             [6, 64, 4, 2],
-#             [6, 96, 3, 1],
-#             [6, 160, 3, 2],
-#             [6, 320, 1, 1]
-#         ]
-#
-#         self.stem_conv = conv3x3(ch_in, 32, stride=2)
-#
-#         layers = []
-#         input_channel = 32
-#         for t, c, n, s in self.configs:
-#             for i in range(n):
-#                 stride = s if i == 0 else 1
-#                 layers.append(InvertedBlock(ch_in=input_channel, ch_out=c, expand_ratio=t, stride=stride))
-#                 input_channel = c
-#
-#         self.layers = nn.Sequential(*layers)
-#         self.last_conv = conv1x1(input_channel, 1024)
-#         self._initialize_weights()
-#
-#     def forward(self, x):
-#         x = self.stem_conv(x)
-#         x = self.layers(x)
-#         x = self.last_conv(x)
-#         return x
-#
-#     def _initialize_weights(self):
-#         for m in self.modules():
-#             if isinstance(m, nn.Conv2d):
-#                 n = m.kernel_size[0] * m.kernel_size[1] * m.out_channels
-#                 m.weight.data.normal_(0, math.sqrt(2. / n))
-#                 if m.bias is not None:
-#                     m.bias.data.zero_()
-#             elif isinstance(m, nn.BatchNorm2d):
-#                 m.weight.data.fill_(1)
-#                 m.bias.data.zero_()
+def dwise_conv(ch_in, stride=1):
+    return (
+        nn.Sequential(
+            #depthwise
+            nn.Conv2d(ch_in, ch_in, kernel_size=3, stride=stride, padding=1, groups=ch_in, bias=False),
+            nn.BatchNorm2d(ch_in),
+            nn.ReLU6(inplace=True),
+        )
+    )
+
+def conv1x1(ch_in, ch_out):
+    return (
+        nn.Sequential(
+            nn.Conv2d(ch_in, ch_out, kernel_size=1, stride=1, padding=0, bias=False),
+            nn.BatchNorm2d(ch_out),
+            nn.ReLU6(inplace=True)
+        )
+    )
+
+def conv1x1_nonlinear(ch_in, ch_out):
+    return (
+        nn.Sequential(
+            nn.Conv2d(ch_in, ch_out, kernel_size=1, stride=1, padding=0, bias=False),
+            nn.BatchNorm2d(ch_out)
+        )
+    )
+
+def conv3x3(ch_in, ch_out, stride):
+    return (
+        nn.Sequential(
+            nn.Conv2d(ch_in, ch_out, kernel_size=3, stride=stride, padding=1, bias=False),
+            nn.BatchNorm2d(ch_out),
+            nn.ReLU6(inplace=True)
+        )
+    )
+
+class InvertedBlock(nn.Module):
+    def __init__(self, ch_in, ch_out, expand_ratio, stride):
+        super(InvertedBlock, self).__init__()
+
+        self.stride = stride
+        assert stride in [1,2]
+        hidden_dim = ch_in * expand_ratio
+        self.use_res_connect = self.stride == 1 and ch_in == ch_out
+
+        layers = []
+        if expand_ratio != 1:
+            layers.append(conv1x1(ch_in, hidden_dim))
+        layers.extend([
+            dwise_conv(hidden_dim, stride=stride), #dw
+            conv1x1_nonlinear(hidden_dim, ch_out) #pw
+        ])
+
+        self.layers = nn.Sequential(*layers)
+
+    def forward(self, x):
+        if self.use_res_connect:
+            return x + self.layers(x)
+        else:
+            return self.layers(x)
+
+class MobileNetV2(nn.Module):
+    def __init__(self, ch_in=3, n_classes=1000):
+        super(MobileNetV2, self).__init__()
+
+        self.configs=[
+            # t, c, n, s
+            [1, 16, 1, 1],
+            [6, 24, 2, 2],
+            [6, 32, 3, 2],
+            [6, 64, 4, 2],
+            [6, 96, 3, 1],
+            [6, 160, 3, 2],
+            [6, 320, 1, 1]
+        ]
+
+        self.stem_conv = conv3x3(ch_in, 32, stride=2)
+
+        layers = []
+        input_channel = 32
+        for t, c, n, s in self.configs:
+            for i in range(n):
+                stride = s if i == 0 else 1
+                layers.append(InvertedBlock(ch_in=input_channel, ch_out=c, expand_ratio=t, stride=stride))
+                input_channel = c
+
+        self.layers = nn.Sequential(*layers)
+        self.last_conv = conv1x1(input_channel, 1024)
+        self._initialize_weights()
+
+    def forward(self, x):
+        x = self.stem_conv(x)
+        x = self.layers(x)
+        x = self.last_conv(x)
+        return x
+
+    def _initialize_weights(self):
+        for m in self.modules():
+            if isinstance(m, nn.Conv2d):
+                n = m.kernel_size[0] * m.kernel_size[1] * m.out_channels
+                m.weight.data.normal_(0, math.sqrt(2. / n))
+                if m.bias is not None:
+                    m.bias.data.zero_()
+            elif isinstance(m, nn.BatchNorm2d):
+                m.weight.data.fill_(1)
+                m.bias.data.zero_()
 
 
 class ModelSpatial(nn.Module):
@@ -171,30 +171,38 @@ class ModelSpatial(nn.Module):
         self.avgpool = nn.AvgPool2d(7, stride=1)
 
         # mobilenetv2: head conv
-        mbnet_head = MobileNetV2(ch_in=3)
+        # mbnet_head = MobileNetV2(ch_in=3)
         # mbnet_head_dict = mbnet_head.state_dict()
         # mbnet_head_pretrained = torch.load('mobilenetv2_init_weights.pth')
         # mbnet_head_pretrained = {k: v for k, v in mbnet_head_pretrained.items() if k in mbnet_head_dict}
         # mbnet_head_dict.update(mbnet_head_pretrained)
         # mbnet_head.load_state_dict(mbnet_head_dict)
 
+        # mbnet_head_layers = []
+        # mbnet_head_layers.append(mbnet_head)
+        # self.mbnet_head_conv = nn.Sequential(*mbnet_head_layers)
+
         mbnet_head_layers = []
-        mbnet_head_layers.append(mbnet_head)
+        mbnet_head_layers.append(MobileNetV2(ch_in=3))
         self.mbnet_head_conv = nn.Sequential(*mbnet_head_layers)
 
         # mobilenetv2: scene conv
-        self.bef_scene_conv = nn.Conv2d(4, 3, kernel_size=7, stride=1, padding=3, bias=False)
-        self.bef_scene_conv_bn = nn.BatchNorm2d(3)
+        # self.bef_scene_conv = nn.Conv2d(4, 3, kernel_size=7, stride=1, padding=3, bias=False)
+        # self.bef_scene_conv_bn = nn.BatchNorm2d(3)
 
-        mbnet_scene = MobileNetV2(ch_in=3)
+        # mbnet_scene = MobileNetV2(ch_in=3)
         # mbnet_scene_dict = mbnet_scene.state_dict()
         # mbnet_scene_pretrained = torch.load('mobilenetv2_init_weights.pth')
         # mbnet_scene_pretrained = {k: v for k, v in mbnet_scene_pretrained.items() if k in mbnet_scene_dict}
         # mbnet_scene_dict.update(mbnet_scene_pretrained)
         # mbnet_scene.load_state_dict(mbnet_scene_dict)
 
+        # mbnet_scene_layers = []
+        # mbnet_scene_layers.append(mbnet_scene)
+        # self.mbnet_scene_conv = nn.Sequential(*mbnet_scene_layers)
+
         mbnet_scene_layers = []
-        mbnet_scene_layers.append(mbnet_scene)
+        mbnet_scene_layers.append(MobileNetV2(ch_in=4))
         self.mbnet_scene_conv = nn.Sequential(*mbnet_scene_layers)
 
         # attention
@@ -207,10 +215,12 @@ class ModelSpatial(nn.Module):
         self.compress_bn2 = nn.BatchNorm2d(512)
 
         # encoding for in/out
-        self.compress_conv1_inout = nn.Conv2d(2048, 512, kernel_size=1, stride=1, padding=0, bias=False)
-        self.compress_bn1_inout = nn.BatchNorm2d(512)
-        self.compress_conv2_inout = nn.Conv2d(512, 1, kernel_size=1, stride=1, padding=0, bias=False)
-        self.compress_bn2_inout = nn.BatchNorm2d(1)
+        self.compress_conv1_inout = nn.Conv2d(2048, 1024, kernel_size=1, stride=1, padding=0, bias=False)
+        self.compress_bn1_inout = nn.BatchNorm2d(1024)
+        self.compress_conv2_inout = nn.Conv2d(1024, 512, kernel_size=1, stride=1, padding=0, bias=False)
+        self.compress_bn2_inout = nn.BatchNorm2d(512)
+        self.compress_conv3_inout = nn.Conv2d(512, 1, kernel_size=1, stride=1, padding=0, bias=False)
+        self.compress_bn3_inout = nn.BatchNorm2d(1)
         self.fc_inout = nn.Linear(49, 1)
 
         # decoding
@@ -257,9 +267,9 @@ class ModelSpatial(nn.Module):
 
         # Scene Conv
         im = torch.cat((images, head), dim=1)
-        scene_feat = self.bef_scene_conv(im)
-        scene_feat = self.bef_scene_conv_bn(scene_feat)
-        scene_feat = self.mbnet_scene_conv(scene_feat)
+        # scene_feat = self.bef_scene_conv(im)
+        # scene_feat = self.bef_scene_conv_bn(scene_feat)
+        scene_feat = self.mbnet_scene_conv(im)
 
         # print("scene_feat.shape: ", scene_feat.shape) # [48, 1024, 7, 7]
         # attn_weights = torch.ones(attn_weights.shape)/49.0
@@ -294,6 +304,9 @@ class ModelSpatial(nn.Module):
         encoding = self.relu(encoding)
         encoding = self.compress_conv2(encoding)
         encoding = self.compress_bn2(encoding)
+        encoding = self.relu(encoding)
+        encoding = self.compress_conv3(encoding)
+        encoding = self.compress_bn3(encoding)
         encoding = self.relu(encoding)
 
         # Decode
