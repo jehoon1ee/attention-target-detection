@@ -204,12 +204,15 @@ def train():
                         # [4] AP
                         in_vs_out_groundtruth.extend(cont_gaze.cpu().numpy())
                         in_vs_out_pred.extend(val_inout_pred.cpu().numpy())
+                        print("in_vs_out_groundtruth: ", in_vs_out_groundtruth)
+                        print("in_vs_out_pred: ", in_vs_out_pred)
 
                 print("\tAUC:{:.4f}\tmin dist:{:.4f}\tavg dist:{:.4f}\tin vs out AP:{:.4f}".format(
                     torch.mean(torch.tensor(AUC)),
                     torch.mean(torch.tensor(min_dist)),
                     torch.mean(torch.tensor(avg_dist)),
-                    evaluation.ap(in_vs_out_groundtruth, in_vs_out_pred)))
+                    evaluation.ap(in_vs_out_groundtruth, in_vs_out_pred)
+                    ))
 
                 # Tensorboard
                 # val_ind = np.random.choice(len(val_images), replace=False)
