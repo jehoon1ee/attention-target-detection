@@ -219,10 +219,10 @@ class ModelSpatial(nn.Module):
         self.compress_bn1_inout = nn.BatchNorm2d(1024)
         self.compress_conv2_inout = nn.Conv2d(1024, 512, kernel_size=1, stride=1, padding=0, bias=False)
         self.compress_bn2_inout = nn.BatchNorm2d(512)
-        self.compress_conv3_inout = nn.Conv2d(512, 1, kernel_size=1, stride=1, padding=0, bias=False)
-        self.compress_bn3_inout = nn.BatchNorm2d(1)
-        # self.compress_conv4_inout = nn.Conv2d(256, 1, kernel_size=1, stride=1, padding=0, bias=False)
-        # self.compress_bn4_inout = nn.BatchNorm2d(1)
+        self.compress_conv3_inout = nn.Conv2d(512, 256, kernel_size=1, stride=1, padding=0, bias=False)
+        self.compress_bn3_inout = nn.BatchNorm2d(256)
+        self.compress_conv4_inout = nn.Conv2d(256, 1, kernel_size=1, stride=1, padding=0, bias=False)
+        self.compress_bn4_inout = nn.BatchNorm2d(1)
         self.fc_inout = nn.Linear(49, 1)
 
         # decoding
@@ -292,9 +292,9 @@ class ModelSpatial(nn.Module):
         encoding_inout = self.compress_conv3_inout(encoding_inout)
         encoding_inout = self.compress_bn3_inout(encoding_inout)
         encoding_inout = self.relu(encoding_inout)
-        # encoding_inout = self.compress_conv4_inout(encoding_inout)
-        # encoding_inout = self.compress_bn4_inout(encoding_inout)
-        # encoding_inout = self.relu(encoding_inout)
+        encoding_inout = self.compress_conv4_inout(encoding_inout)
+        encoding_inout = self.compress_bn4_inout(encoding_inout)
+        encoding_inout = self.relu(encoding_inout)
         encoding_inout = encoding_inout.view(-1, 49)
         encoding_inout = self.fc_inout(encoding_inout)
 
