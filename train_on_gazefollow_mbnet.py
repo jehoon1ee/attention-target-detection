@@ -161,7 +161,7 @@ def train():
                 ind = np.random.choice(len(images), replace=False)
                 writer.add_scalar("Train Loss", total_loss, global_step=step)
 
-            if step == 1 or batch+1 == max_steps:
+            if batch+1 == max_steps:
                 print('Validation in progress ...')
                 model.train(False)
                 AUC = []; min_dist = []; avg_dist = []; in_vs_out_groundtruth = []; in_vs_out_pred = [];
@@ -202,16 +202,16 @@ def train():
                             avg_dist.append(avg_distance)
 
                         # [4] AP
-                        in_vs_out_groundtruth.extend(cont_gaze.cpu().numpy())
-                        in_vs_out_pred.extend(val_inout_pred.cpu().numpy())
-                        print("in_vs_out_groundtruth: ", in_vs_out_groundtruth)
-                        print("in_vs_out_pred: ", in_vs_out_pred)
+                        # in_vs_out_groundtruth.extend(cont_gaze.cpu().numpy())
+                        # in_vs_out_pred.extend(val_inout_pred.cpu().numpy())
+                        # print("in_vs_out_groundtruth: ", in_vs_out_groundtruth)
+                        # print("in_vs_out_pred: ", in_vs_out_pred)
 
                 print("\tAUC:{:.4f}\tmin dist:{:.4f}\tavg dist:{:.4f}\tin vs out AP:{:.4f}".format(
                     torch.mean(torch.tensor(AUC)),
                     torch.mean(torch.tensor(min_dist)),
-                    torch.mean(torch.tensor(avg_dist)),
-                    evaluation.ap(in_vs_out_groundtruth, in_vs_out_pred)
+                    torch.mean(torch.tensor(avg_dist))
+                    # evaluation.ap(in_vs_out_groundtruth, in_vs_out_pred)
                     ))
 
                 # Tensorboard
