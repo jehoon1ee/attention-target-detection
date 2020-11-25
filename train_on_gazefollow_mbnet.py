@@ -79,11 +79,11 @@ def train():
     print("Loading init_weights ", args.init_weights)
     model = ModelSpatial()
     model.cuda().to(device)
-    # model_dict = model.state_dict()
-    # pretrained_dict = torch.load(args.init_weights)
-    # pretrained_dict = pretrained_dict['model']
-    # model_dict.update(pretrained_dict)
-    # model.load_state_dict(model_dict)
+    model_dict = model.state_dict()
+    pretrained_dict = torch.load(args.init_weights)
+    pretrained_dict = pretrained_dict['model']
+    model_dict.update(pretrained_dict)
+    model.load_state_dict(model_dict)
 
     # Loss functions
     mse_loss = nn.MSELoss(reduce=False) # not reducing in order to ignore outside cases
@@ -135,7 +135,7 @@ def train():
                 print(time.strftime('%c', time.localtime(time.time())))
                 print("Epoch:{:04d}\tstep:{:06d}/{:06d}\ttraining loss: (l2){:.4f} (Xent){:.4f}".format(ep, batch+1, max_steps, l2_loss, Xent_loss))
 
-            if batch+1 == max_steps:
+            if step == 1 or batch+1 == max_steps:
                 print('Validation in progress ...')
                 model.train(False)
                 AUC = []; min_dist = []; avg_dist = [];
@@ -175,7 +175,7 @@ def train():
                             avg_distance = evaluation.L2_dist(mean_gt_gaze, norm_p)
                             avg_dist.append(avg_distance)
 
-                print("\tAUC:{:.4f}\tmin dist:{:.4f}\tavg dist:{:.4f}\tin vs out AP:{:.4f}".format(
+                print("\tAUC:{:.4f}\tmin dist:{:.4f}\tavg dist:{:.4f}".format(
                     torch.mean(torch.tensor(AUC)),
                     torch.mean(torch.tensor(min_dist)),
                     torch.mean(torch.tensor(avg_dist))
