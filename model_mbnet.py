@@ -192,30 +192,30 @@ class ModelSpatial(nn.Module):
         self.attn = nn.Linear(1808, 1*7*7)
 
         # In Frame?
-        self.compress_conv1_inout = nn.Conv2d(2048, 1024, kernel_size=1, stride=1, padding=0, bias=False)
-        self.compress_bn1_inout = nn.BatchNorm2d(1024)
-        self.compress_conv2_inout = nn.Conv2d(1024, 512, kernel_size=1, stride=1, padding=0, bias=False)
-        self.compress_bn2_inout = nn.BatchNorm2d(512)
-        self.compress_conv3_inout = nn.Conv2d(512, 256, kernel_size=1, stride=1, padding=0, bias=False)
-        self.compress_bn3_inout = nn.BatchNorm2d(256)
-        self.compress_conv4_inout = nn.Conv2d(256, 1, kernel_size=1, stride=1, padding=0, bias=False)
-        self.compress_bn4_inout = nn.BatchNorm2d(1)
-        self.fc_inout = nn.Linear(49, 1)
+        # self.compress_conv1_inout = nn.Conv2d(2048, 1024, kernel_size=1, stride=1, padding=0, bias=False)
+        # self.compress_bn1_inout = nn.BatchNorm2d(1024)
+        # self.compress_conv2_inout = nn.Conv2d(1024, 512, kernel_size=1, stride=1, padding=0, bias=False)
+        # self.compress_bn2_inout = nn.BatchNorm2d(512)
+        # self.compress_conv3_inout = nn.Conv2d(512, 256, kernel_size=1, stride=1, padding=0, bias=False)
+        # self.compress_bn3_inout = nn.BatchNorm2d(256)
+        # self.compress_conv4_inout = nn.Conv2d(256, 1, kernel_size=1, stride=1, padding=0, bias=False)
+        # self.compress_bn4_inout = nn.BatchNorm2d(1)
+        # self.fc_inout = nn.Linear(49, 1)
 
         # Encode: saliency
-        # self.compress_conv1 = nn.Conv2d(2048, 1024, kernel_size=1, stride=1, padding=0, bias=False)
-        # self.compress_bn1 = nn.BatchNorm2d(1024)
-        # self.compress_conv2 = nn.Conv2d(1024, 512, kernel_size=1, stride=1, padding=0, bias=False)
-        # self.compress_bn2 = nn.BatchNorm2d(512)
+        self.compress_conv1 = nn.Conv2d(2048, 1024, kernel_size=1, stride=1, padding=0, bias=False)
+        self.compress_bn1 = nn.BatchNorm2d(1024)
+        self.compress_conv2 = nn.Conv2d(1024, 512, kernel_size=1, stride=1, padding=0, bias=False)
+        self.compress_bn2 = nn.BatchNorm2d(512)
 
         # Deconv
-        # self.deconv1 = nn.ConvTranspose2d(512, 256, kernel_size=3, stride=2)
-        # self.deconv_bn1 = nn.BatchNorm2d(256)
-        # self.deconv2 = nn.ConvTranspose2d(256, 128, kernel_size=3, stride=2)
-        # self.deconv_bn2 = nn.BatchNorm2d(128)
-        # self.deconv3 = nn.ConvTranspose2d(128, 1, kernel_size=4, stride=2)
-        # self.deconv_bn3 = nn.BatchNorm2d(1)
-        # self.conv4 = nn.Conv2d(1, 1, kernel_size=1, stride=1)
+        self.deconv1 = nn.ConvTranspose2d(512, 256, kernel_size=3, stride=2)
+        self.deconv_bn1 = nn.BatchNorm2d(256)
+        self.deconv2 = nn.ConvTranspose2d(256, 128, kernel_size=3, stride=2)
+        self.deconv_bn2 = nn.BatchNorm2d(128)
+        self.deconv3 = nn.ConvTranspose2d(128, 1, kernel_size=4, stride=2)
+        self.deconv_bn3 = nn.BatchNorm2d(1)
+        self.conv4 = nn.Conv2d(1, 1, kernel_size=1, stride=1)
 
         # Initialize weights
         for m in self.modules():
