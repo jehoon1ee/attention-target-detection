@@ -24,8 +24,8 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--device", type=int, default=0, help="gpu id")
-parser.add_argument("--init_weights", type=str, default="mobilenetv2_init_weights.pth", help="initial weights")
-parser.add_argument("--lr", type=float, default=5e-4, help="learning rate")
+parser.add_argument("--init_weights", type=str, default="mbnet_weights_9.pt", help="initial weights")
+parser.add_argument("--lr", type=float, default=2.5e-4, help="learning rate")
 parser.add_argument("--batch_size", type=int, default=48, help="batch size")
 parser.add_argument("--epochs", type=int, default=70, help="number of epochs")
 parser.add_argument("--print_every", type=int, default=25, help="print every ___ iterations")
@@ -138,7 +138,7 @@ def train():
 
             # [2] cross entropy loss for in vs out
             # print("inout_pred: ", inout_pred)
-            Xent_loss = bcelogit_loss(inout_pred.squeeze(), gaze_inside.squeeze()) * 200
+            Xent_loss = bcelogit_loss(inout_pred.squeeze(), gaze_inside.squeeze()) * 100
             # print("inout_pred.squeeze(): ", inout_pred.squeeze())
             # print("gaze_inside.squeeze(): ", gaze_inside.squeeze())
 

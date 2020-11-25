@@ -101,7 +101,8 @@ def run():
 
             inout = inout.cpu().detach().numpy()
             inout = 1 / (1 + np.exp(-inout))
-            inout = (1 - inout) * 255
+            # inout = (1 - inout) * 255
+            inout = ((1 - inout) * 255) / 2
 
             # norm_map = imresize(raw_hm, (height, width)) - inout
             norm_map = np.array(Image.fromarray(raw_hm).resize((width, height))) - inout
