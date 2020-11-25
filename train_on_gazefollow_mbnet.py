@@ -79,11 +79,11 @@ def train():
     print("Loading init_weights ", args.init_weights)
     model = ModelSpatial()
     model.cuda().to(device)
-    model_dict = model.state_dict()
-    pretrained_dict = torch.load(args.init_weights)
-    pretrained_dict = pretrained_dict['model']
-    model_dict.update(pretrained_dict)
-    model.load_state_dict(model_dict)
+    # model_dict = model.state_dict()
+    # pretrained_dict = torch.load(args.init_weights)
+    # pretrained_dict = pretrained_dict['model']
+    # model_dict.update(pretrained_dict)
+    # model.load_state_dict(model_dict)
 
     # Loss functions
     mse_loss = nn.MSELoss(reduce=False) # not reducing in order to ignore outside cases
@@ -107,21 +107,22 @@ def train():
             gaze_heatmap = gaze_heatmap.cuda().to(device)
 
             gaze_heatmap_pred, attmap, inout_pred = model(images, head, faces)
-            gaze_heatmap_pred = gaze_heatmap_pred.squeeze(1)
+            # gaze_heatmap_pred = gaze_heatmap_pred.squeeze(1)
 
             # [1] L2 loss computed only for inside case
-            l2_loss = mse_loss(gaze_heatmap_pred, gaze_heatmap) * loss_amp_factor
-            l2_loss = torch.mean(l2_loss, dim=1)
-            l2_loss = torch.mean(l2_loss, dim=1) # why twice?
-
-            gaze_inside = gaze_inside.cuda(device).to(torch.float)
-            l2_loss = torch.mul(l2_loss, gaze_inside) # zero out loss when it's out-of-frame gaze case
-            l2_loss = torch.sum(l2_loss) / torch.sum(gaze_inside)
+            # l2_loss = mse_loss(gaze_heatmap_pred, gaze_heatmap) * loss_amp_factor
+            # l2_loss = torch.mean(l2_loss, dim=1)
+            # l2_loss = torch.mean(l2_loss, dim=1) # why twice?
+            #
+            # gaze_inside = gaze_inside.cuda(device).to(torch.float)
+            # l2_loss = torch.mul(l2_loss, gaze_inside) # zero out loss when it's out-of-frame gaze case
+            # l2_loss = torch.sum(l2_loss) / torch.sum(gaze_inside)
 
             # [2] cross entropy loss for in vs out
             Xent_loss = bcelogit_loss(inout_pred.squeeze(), gaze_inside.squeeze()) * 100
 
-            total_loss = l2_loss + Xent_loss
+            # total_loss = l2_loss + Xent_loss
+            total_loss = Xent_loss
             # NOTE: summed loss is used to train the main model.
             # l2_loss is used to get SOTA on GazeFollow benchmark.
             total_loss.backward() # loss accumulation
@@ -135,51 +136,51 @@ def train():
                 print(time.strftime('%c', time.localtime(time.time())))
                 print("Epoch:{:04d}\tstep:{:06d}/{:06d}\ttraining loss: (l2){:.4f} (Xent){:.4f}".format(ep, batch+1, max_steps, l2_loss, Xent_loss))
 
-            if step == 1 or batch+1 == max_steps:
-                print('Validation in progress ...')
-                model.train(False)
-                AUC = []; min_dist = []; avg_dist = [];
-                with torch.no_grad():
-                    for val_batch, (val_img, val_face, val_head_channel, val_gaze_heatmap, cont_gaze, imsize, _) in enumerate(val_loader):
-                        val_images = val_img.cuda().to(device)
-                        val_head = val_head_channel.cuda().to(device)
-                        val_faces = val_face.cuda().to(device)
-                        val_gaze_heatmap = val_gaze_heatmap.cuda().to(device)
-                        val_gaze_heatmap_pred, val_attmap, val_inout_pred = model(val_images, val_head, val_faces)
-                        val_gaze_heatmap_pred = val_gaze_heatmap_pred.squeeze(1)
-
-                        # go through each data point and record AUC, min dist, avg dist
-                        for b_i in range(len(cont_gaze)):
-                            # remove padding and recover valid ground truth points
-                            valid_gaze = cont_gaze[b_i]
-                            valid_gaze = valid_gaze[valid_gaze != -1].view(-1,2)
-
-                            # [1] auc
-                            multi_hot = imutils.multi_hot_targets(cont_gaze[b_i], imsize[b_i])
-                            tmp1 = imsize[b_i][0].item()
-                            tmp2 = imsize[b_i][1].item()
-                            scaled_heatmap = np.array(Image.fromarray(val_gaze_heatmap_pred[b_i].cpu().detach().numpy()).resize((tmp1, tmp2), Image.BILINEAR))
-                            auc_score = evaluation.auc(scaled_heatmap, multi_hot)
-                            AUC.append(auc_score)
-
-                            # [2] min distance: minimum among all possible pairs of <ground truth point, predicted point>
-                            pred_x, pred_y = evaluation.argmax_pts(val_gaze_heatmap_pred[b_i].cpu().detach().numpy())
-                            norm_p = [pred_x/float(output_resolution), pred_y/float(output_resolution)]
-                            all_distances = []
-                            for gt_gaze in valid_gaze:
-                                all_distances.append(evaluation.L2_dist(gt_gaze, norm_p))
-                            min_dist.append(min(all_distances))
-
-                            # [3] average distance: distance between the predicted point and human average point
-                            mean_gt_gaze = torch.mean(valid_gaze, 0)
-                            avg_distance = evaluation.L2_dist(mean_gt_gaze, norm_p)
-                            avg_dist.append(avg_distance)
-
-                print("\tAUC:{:.4f}\tmin dist:{:.4f}\tavg dist:{:.4f}".format(
-                    torch.mean(torch.tensor(AUC)),
-                    torch.mean(torch.tensor(min_dist)),
-                    torch.mean(torch.tensor(avg_dist))
-                    ))
+            # if step == 1 or batch+1 == max_steps:
+            #     print('Validation in progress ...')
+            #     model.train(False)
+            #     AUC = []; min_dist = []; avg_dist = [];
+            #     with torch.no_grad():
+            #         for val_batch, (val_img, val_face, val_head_channel, val_gaze_heatmap, cont_gaze, imsize, _) in enumerate(val_loader):
+            #             val_images = val_img.cuda().to(device)
+            #             val_head = val_head_channel.cuda().to(device)
+            #             val_faces = val_face.cuda().to(device)
+            #             val_gaze_heatmap = val_gaze_heatmap.cuda().to(device)
+            #             val_gaze_heatmap_pred, val_attmap, val_inout_pred = model(val_images, val_head, val_faces)
+            #             val_gaze_heatmap_pred = val_gaze_heatmap_pred.squeeze(1)
+            #
+            #             # go through each data point and record AUC, min dist, avg dist
+            #             for b_i in range(len(cont_gaze)):
+            #                 # remove padding and recover valid ground truth points
+            #                 valid_gaze = cont_gaze[b_i]
+            #                 valid_gaze = valid_gaze[valid_gaze != -1].view(-1,2)
+            #
+            #                 # [1] auc
+            #                 multi_hot = imutils.multi_hot_targets(cont_gaze[b_i], imsize[b_i])
+            #                 tmp1 = imsize[b_i][0].item()
+            #                 tmp2 = imsize[b_i][1].item()
+            #                 scaled_heatmap = np.array(Image.fromarray(val_gaze_heatmap_pred[b_i].cpu().detach().numpy()).resize((tmp1, tmp2), Image.BILINEAR))
+            #                 auc_score = evaluation.auc(scaled_heatmap, multi_hot)
+            #                 AUC.append(auc_score)
+            #
+            #                 # [2] min distance: minimum among all possible pairs of <ground truth point, predicted point>
+            #                 pred_x, pred_y = evaluation.argmax_pts(val_gaze_heatmap_pred[b_i].cpu().detach().numpy())
+            #                 norm_p = [pred_x/float(output_resolution), pred_y/float(output_resolution)]
+            #                 all_distances = []
+            #                 for gt_gaze in valid_gaze:
+            #                     all_distances.append(evaluation.L2_dist(gt_gaze, norm_p))
+            #                 min_dist.append(min(all_distances))
+            #
+            #                 # [3] average distance: distance between the predicted point and human average point
+            #                 mean_gt_gaze = torch.mean(valid_gaze, 0)
+            #                 avg_distance = evaluation.L2_dist(mean_gt_gaze, norm_p)
+            #                 avg_dist.append(avg_distance)
+            #
+            #     print("\tAUC:{:.4f}\tmin dist:{:.4f}\tavg dist:{:.4f}".format(
+            #         torch.mean(torch.tensor(AUC)),
+            #         torch.mean(torch.tensor(min_dist)),
+            #         torch.mean(torch.tensor(avg_dist))
+            #         ))
 
         if ep % args.save_every == 0:
             # save the model
