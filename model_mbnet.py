@@ -138,7 +138,8 @@ class MobileNetV2(nn.Module):
         self.stem_conv = conv3x3(ch_in, 32, stride=2)
 
         layers = []
-        input_channel = 64
+        # input_channel = 64
+        input_channel = 32
         for t, c, n, s in self.configs:
             for i in range(n):
                 stride = s if i == 0 else 1
