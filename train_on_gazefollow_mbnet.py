@@ -109,6 +109,7 @@ def train():
             gaze_heatmap_pred, attmap, inout_pred = model(images, head, faces)
             # gaze_heatmap_pred = gaze_heatmap_pred.squeeze(1)
 
+            l2_loss = 0
             # [1] L2 loss computed only for inside case
             # l2_loss = mse_loss(gaze_heatmap_pred, gaze_heatmap) * loss_amp_factor
             # l2_loss = torch.mean(l2_loss, dim=1)
