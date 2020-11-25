@@ -24,7 +24,7 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--device", type=int, default=0, help="gpu id")
-parser.add_argument("--init_weights", type=str, default="mbnet_weights_9.pt", help="initial weights")
+parser.add_argument("--init_weights", type=str, default="mbnet_weights_11.pt", help="initial weights")
 parser.add_argument("--lr", type=float, default=2.5e-4, help="learning rate")
 parser.add_argument("--batch_size", type=int, default=48, help="batch size")
 parser.add_argument("--epochs", type=int, default=70, help="number of epochs")
@@ -161,10 +161,10 @@ def train():
                 ind = np.random.choice(len(images), replace=False)
                 writer.add_scalar("Train Loss", total_loss, global_step=step)
 
-            if batch+1 == max_steps:
+            if step == 0 or batch+1 == max_steps:
                 print('Validation in progress ...')
                 model.train(False)
-                AUC = []; min_dist = []; avg_dist = []
+                AUC = []; min_dist = []; avg_dist = []; in_vs_out_groundtruth = []; in_vs_out_pred = [];
                 with torch.no_grad():
                     for val_batch, (val_img, val_face, val_head_channel, val_gaze_heatmap, cont_gaze, imsize, _) in enumerate(val_loader):
                         val_images = val_img.cuda().to(device)
@@ -201,10 +201,15 @@ def train():
                             avg_distance = evaluation.L2_dist(mean_gt_gaze, norm_p)
                             avg_dist.append(avg_distance)
 
-                print("\tAUC:{:.4f}\tmin dist:{:.4f}\tavg dist:{:.4f}".format(
+                        # [4] AP
+                        in_vs_out_groundtruth.extend(cont_gaze.cpu().numpy())
+                        in_vs_out_pred.extend(val_inout_pred.cpu().numpy())
+
+                print("\tAUC:{:.4f}\tmin dist:{:.4f}\tavg dist:{:.4f}\tin vs out AP:{:.4f}".format(
                     torch.mean(torch.tensor(AUC)),
                     torch.mean(torch.tensor(min_dist)),
-                    torch.mean(torch.tensor(avg_dist))))
+                    torch.mean(torch.tensor(avg_dist)))),
+                    evaluation.ap(in_vs_out_groundtruth, in_vs_out_pred))
 
                 # Tensorboard
                 # val_ind = np.random.choice(len(val_images), replace=False)
