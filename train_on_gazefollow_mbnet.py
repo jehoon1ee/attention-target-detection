@@ -208,8 +208,8 @@ def train():
                 print("\tAUC:{:.4f}\tmin dist:{:.4f}\tavg dist:{:.4f}\tin vs out AP:{:.4f}".format(
                     torch.mean(torch.tensor(AUC)),
                     torch.mean(torch.tensor(min_dist)),
-                    torch.mean(torch.tensor(avg_dist)))),
-                    evaluation.ap(in_vs_out_groundtruth, in_vs_out_pred))
+                    torch.mean(torch.tensor(avg_dist)),
+                    evaluation.ap(in_vs_out_groundtruth, in_vs_out_pred)))
 
                 # Tensorboard
                 # val_ind = np.random.choice(len(val_images), replace=False)
