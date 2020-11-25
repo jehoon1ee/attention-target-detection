@@ -114,7 +114,7 @@ def train():
             # l2_loss = torch.mean(l2_loss, dim=1)
             # l2_loss = torch.mean(l2_loss, dim=1) # why twice?
             #
-            # gaze_inside = gaze_inside.cuda(device).to(torch.float)
+            gaze_inside = gaze_inside.cuda(device).to(torch.float)
             # l2_loss = torch.mul(l2_loss, gaze_inside) # zero out loss when it's out-of-frame gaze case
             # l2_loss = torch.sum(l2_loss) / torch.sum(gaze_inside)
 
