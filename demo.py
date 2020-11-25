@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 from PIL import Image
 from model_mbnet import ModelSpatial
+# from model import ModelSpatial
 from utils import imutils, evaluation
 from config import *
 import easydict
@@ -31,7 +32,9 @@ def _get_transform():
 def run():
 
     args = easydict.EasyDict({
-        "model_weights": "mbnet_weights.pt",
+        # "model_weights": "model_demo.pt",
+        "model_weights": "mbnet_weights_5.pt",
+        # "model_weights": "resnet_weights_3.pt",
         "image_dir": "data/demo/frames",
         "head": "data/demo/person1.txt",
         "vis_mode": "heatmap",
@@ -106,22 +109,21 @@ def run():
             # print (norm_map)
 
             # vis
-            plt.close()
-            fig = plt.figure()
-            # fig.canvas.manager.window.move(0,0)
-            plt.axis('off')
-            plt.imshow(frame_raw)
+            # plt.close()
+            # fig = plt.figure()
+            # plt.axis('off')
+            # plt.imshow(frame_raw)
 
-            ax = plt.gca()
-            rect = patches.Rectangle((head_box[0], head_box[1]), head_box[2]-head_box[0], head_box[3]-head_box[1], linewidth=2, edgecolor=(0,1,0), facecolor='none')
-            ax.add_patch(rect)
+            # ax = plt.gca()
+            # rect = patches.Rectangle((head_box[0], head_box[1]), head_box[2]-head_box[0], head_box[3]-head_box[1], linewidth=2, edgecolor=(0,1,0), facecolor='none')
+            # ax.add_patch(rect)
 
             # print ("inout: ", inout)
             # print ("out_threshold: ", args.out_threshold)
 
-            plt.imshow(norm_map, cmap = 'jet', alpha=0.2, vmin=0, vmax=255)
+            # plt.imshow(norm_map, cmap = 'jet', alpha=0.2, vmin=0, vmax=255)
 
-            plt.show(block=False)
+            # plt.show(block=False)
 
         print('DONE!')
 
