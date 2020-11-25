@@ -85,10 +85,6 @@ def train():
     model_dict.update(pretrained_dict)
     model.load_state_dict(model_dict)
 
-    # for name, param in model.named_parameters():
-    #     if param.requires_grad:
-    #         print(name, param.data)
-
     # Loss functions
     mse_loss = nn.MSELoss(reduce=False) # not reducing in order to ignore outside cases
     bcelogit_loss = nn.BCEWithLogitsLoss()
@@ -110,41 +106,22 @@ def train():
             faces = face.cuda().to(device)
             gaze_heatmap = gaze_heatmap.cuda().to(device)
 
-            # print("images.shape: ", images.shape)
-            # print("head.shape: ", head.shape)
-            # print("faces.shape: ", faces.shape)
-            # print("gaze_heatmap.shape: ", gaze_heatmap.shape)
-
             gaze_heatmap_pred, attmap, inout_pred = model(images, head, faces)
             gaze_heatmap_pred = gaze_heatmap_pred.squeeze(1)
 
             # [1] L2 loss computed only for inside case
-            # print("\n")
-            # print("gaze_heatmap_pred.shape: ", gaze_heatmap_pred.shape)
-            # print("gaze_heatmap.shape: ", gaze_heatmap.shape)
             l2_loss = mse_loss(gaze_heatmap_pred, gaze_heatmap) * loss_amp_factor
-            # print("[1] l2_loss.shape: ", l2_loss.shape)
             l2_loss = torch.mean(l2_loss, dim=1)
-            # print("[2] l2_loss.shape: ", l2_loss.shape)
             l2_loss = torch.mean(l2_loss, dim=1) # why twice?
-            # print("[3] l2_loss.shape: ", l2_loss.shape)
 
             gaze_inside = gaze_inside.cuda(device).to(torch.float)
-            # print("gaze_inside.shape: ", gaze_inside.shape)
-            # print("gaze_inside: ", gaze_inside)
             l2_loss = torch.mul(l2_loss, gaze_inside) # zero out loss when it's out-of-frame gaze case
             l2_loss = torch.sum(l2_loss) / torch.sum(gaze_inside)
-            # print("[4] l2_loss: ", l2_loss)
 
             # [2] cross entropy loss for in vs out
-            # print("inout_pred: ", inout_pred)
             Xent_loss = bcelogit_loss(inout_pred.squeeze(), gaze_inside.squeeze()) * 100
-            # print("inout_pred.squeeze(): ", inout_pred.squeeze())
-            # print("gaze_inside.squeeze(): ", gaze_inside.squeeze())
 
             total_loss = l2_loss + Xent_loss
-            # total_loss = Xent_loss
-            # total_loss = l2_loss
             # NOTE: summed loss is used to train the main model.
             # l2_loss is used to get SOTA on GazeFollow benchmark.
             total_loss.backward() # loss accumulation
@@ -157,14 +134,11 @@ def train():
             if batch % args.print_every == 0:
                 print(time.strftime('%c', time.localtime(time.time())))
                 print("Epoch:{:04d}\tstep:{:06d}/{:06d}\ttraining loss: (l2){:.4f} (Xent){:.4f}".format(ep, batch+1, max_steps, l2_loss, Xent_loss))
-                # Tensorboard
-                ind = np.random.choice(len(images), replace=False)
-                writer.add_scalar("Train Loss", total_loss, global_step=step)
 
             if batch+1 == max_steps:
                 print('Validation in progress ...')
                 model.train(False)
-                AUC = []; min_dist = []; avg_dist = []; in_vs_out_groundtruth = []; in_vs_out_pred = [];
+                AUC = []; min_dist = []; avg_dist = [];
                 with torch.no_grad():
                     for val_batch, (val_img, val_face, val_head_channel, val_gaze_heatmap, cont_gaze, imsize, _) in enumerate(val_loader):
                         val_images = val_img.cuda().to(device)
@@ -201,24 +175,11 @@ def train():
                             avg_distance = evaluation.L2_dist(mean_gt_gaze, norm_p)
                             avg_dist.append(avg_distance)
 
-                        # [4] AP
-                        # in_vs_out_groundtruth.extend(cont_gaze.cpu().numpy())
-                        # in_vs_out_pred.extend(val_inout_pred.cpu().numpy())
-                        # print("in_vs_out_groundtruth: ", in_vs_out_groundtruth)
-                        # print("in_vs_out_pred: ", in_vs_out_pred)
-
                 print("\tAUC:{:.4f}\tmin dist:{:.4f}\tavg dist:{:.4f}\tin vs out AP:{:.4f}".format(
                     torch.mean(torch.tensor(AUC)),
                     torch.mean(torch.tensor(min_dist)),
                     torch.mean(torch.tensor(avg_dist))
-                    # evaluation.ap(in_vs_out_groundtruth, in_vs_out_pred)
                     ))
-
-                # Tensorboard
-                # val_ind = np.random.choice(len(val_images), replace=False)
-                # writer.add_scalar('Validation AUC', torch.mean(torch.tensor(AUC)), global_step=step)
-                # writer.add_scalar('Validation min dist', torch.mean(torch.tensor(min_dist)), global_step=step)
-                # writer.add_scalar('Validation avg dist', torch.mean(torch.tensor(avg_dist)), global_step=step)
 
         if ep % args.save_every == 0:
             # save the model

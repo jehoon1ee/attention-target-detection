@@ -86,6 +86,14 @@ def conv3x3(ch_in, ch_out, stride):
         )
     )
 
+def conv7x7_nonlinear(ch_in, ch_out, stride):
+    return (
+        nn.Sequential(
+            nn.Conv2d(ch_in, ch_out, kernel_size=7, stride=stride, padding=3, bias=False),
+            nn.BatchNorm2d(ch_out)
+        )
+    )
+
 class InvertedBlock(nn.Module):
     def __init__(self, ch_in, ch_out, expand_ratio, stride):
         super(InvertedBlock, self).__init__()
@@ -126,10 +134,10 @@ class MobileNetV2(nn.Module):
             [6, 320, 1, 1]
         ]
 
-        self.stem_conv = conv3x3(ch_in, 32, stride=2)
+        self.stem_conv = conv7x7(ch_in, 64, stride=2)
 
         layers = []
-        input_channel = 32
+        input_channel = 64
         for t, c, n, s in self.configs:
             for i in range(n):
                 stride = s if i == 0 else 1
@@ -170,36 +178,9 @@ class ModelSpatial(nn.Module):
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
         self.avgpool = nn.AvgPool2d(7, stride=1)
 
-        # mobilenetv2: head conv
-        # mbnet_head = MobileNetV2(ch_in=3)
-        # mbnet_head_dict = mbnet_head.state_dict()
-        # mbnet_head_pretrained = torch.load('mobilenetv2_init_weights.pth')
-        # mbnet_head_pretrained = {k: v for k, v in mbnet_head_pretrained.items() if k in mbnet_head_dict}
-        # mbnet_head_dict.update(mbnet_head_pretrained)
-        # mbnet_head.load_state_dict(mbnet_head_dict)
-
-        # mbnet_head_layers = []
-        # mbnet_head_layers.append(mbnet_head)
-        # self.mbnet_head_conv = nn.Sequential(*mbnet_head_layers)
-
         mbnet_head_layers = []
         mbnet_head_layers.append(MobileNetV2(ch_in=3))
         self.mbnet_head_conv = nn.Sequential(*mbnet_head_layers)
-
-        # mobilenetv2: scene conv
-        # self.bef_scene_conv = nn.Conv2d(4, 3, kernel_size=7, stride=1, padding=3, bias=False)
-        # self.bef_scene_conv_bn = nn.BatchNorm2d(3)
-
-        # mbnet_scene = MobileNetV2(ch_in=3)
-        # mbnet_scene_dict = mbnet_scene.state_dict()
-        # mbnet_scene_pretrained = torch.load('mobilenetv2_init_weights.pth')
-        # mbnet_scene_pretrained = {k: v for k, v in mbnet_scene_pretrained.items() if k in mbnet_scene_dict}
-        # mbnet_scene_dict.update(mbnet_scene_pretrained)
-        # mbnet_scene.load_state_dict(mbnet_scene_dict)
-
-        # mbnet_scene_layers = []
-        # mbnet_scene_layers.append(mbnet_scene)
-        # self.mbnet_scene_conv = nn.Sequential(*mbnet_scene_layers)
 
         mbnet_scene_layers = []
         mbnet_scene_layers.append(MobileNetV2(ch_in=4))
@@ -208,13 +189,7 @@ class ModelSpatial(nn.Module):
         # attention
         self.attn = nn.Linear(1808, 1*7*7)
 
-        # encoding for saliency
-        self.compress_conv1 = nn.Conv2d(2048, 1024, kernel_size=1, stride=1, padding=0, bias=False)
-        self.compress_bn1 = nn.BatchNorm2d(1024)
-        self.compress_conv2 = nn.Conv2d(1024, 512, kernel_size=1, stride=1, padding=0, bias=False)
-        self.compress_bn2 = nn.BatchNorm2d(512)
-
-        # encoding for in/out
+        # In Frame?
         self.compress_conv1_inout = nn.Conv2d(2048, 1024, kernel_size=1, stride=1, padding=0, bias=False)
         self.compress_bn1_inout = nn.BatchNorm2d(1024)
         self.compress_conv2_inout = nn.Conv2d(1024, 512, kernel_size=1, stride=1, padding=0, bias=False)
@@ -225,7 +200,13 @@ class ModelSpatial(nn.Module):
         self.compress_bn4_inout = nn.BatchNorm2d(1)
         self.fc_inout = nn.Linear(49, 1)
 
-        # decoding
+        # Encode: saliency
+        self.compress_conv1 = nn.Conv2d(2048, 1024, kernel_size=1, stride=1, padding=0, bias=False)
+        self.compress_bn1 = nn.BatchNorm2d(1024)
+        self.compress_conv2 = nn.Conv2d(1024, 512, kernel_size=1, stride=1, padding=0, bias=False)
+        self.compress_bn2 = nn.BatchNorm2d(512)
+
+        # Deconv
         self.deconv1 = nn.ConvTranspose2d(512, 256, kernel_size=3, stride=2)
         self.deconv_bn1 = nn.BatchNorm2d(256)
         self.deconv2 = nn.ConvTranspose2d(256, 128, kernel_size=3, stride=2)
@@ -244,22 +225,14 @@ class ModelSpatial(nn.Module):
                 m.bias.data.zero_()
 
     def forward(self, images, head, face):
-        # print("images.shape: ", images.shape) # [48, 3, 224 ,244]
-        # print("head.shape: ", head.shape) # [48, 1, 224, 224]
-        # print("face.shape: ", face.shape) # [48, 3, 224, 224]
-
-        # reduce head channel size by max pooling: (N, 1, 224, 224) -> (N, 1, 28, 28)
-        head_reduced = self.maxpool(self.maxpool(self.maxpool(head))).view(-1, 784)
-        # print("head_reduced.shape: ", head_reduced.shape) # [48, 784]
-
         # Head Conv mbnet
         face_feat = self.mbnet_head_conv(face)
 
-        # print("face_feat.shape: ", face_feat.shape) # [48, 1024, 7, 7]
-
         # reduce face feature size by avg pooling: (N, 1024, 7, 7) -> (N, 1024, 1, 1)
         face_feat_reduced = self.avgpool(face_feat).view(-1, 1024)
-        # print("face_feat_reduced.shape: ", face_feat_reduced.shape) # [48, 1024, 7, 7]
+
+        # reduce head channel size by max pooling: (N, 1, 224, 224) -> (N, 1, 28, 28)
+        head_reduced = self.maxpool(self.maxpool(self.maxpool(head))).view(-1, 784)
 
         # get and reshape attention weights such that it can be multiplied with scene feature map
         attn_weights = self.attn(torch.cat((head_reduced, face_feat_reduced), 1))
@@ -269,18 +242,11 @@ class ModelSpatial(nn.Module):
 
         # Scene Conv
         im = torch.cat((images, head), dim=1)
-        # scene_feat = self.bef_scene_conv(im)
-        # scene_feat = self.bef_scene_conv_bn(scene_feat)
         scene_feat = self.mbnet_scene_conv(im)
 
-        # print("scene_feat.shape: ", scene_feat.shape) # [48, 1024, 7, 7]
-        # attn_weights = torch.ones(attn_weights.shape)/49.0
-
         attn_applied_scene_feat = torch.mul(attn_weights, scene_feat) # (N, 1, 7, 7) # applying attention weights on scene feat
-        # print("attn_applied_scene_feat.shape: ", attn_applied_scene_feat.shape)
 
         scene_face_feat = torch.cat((attn_applied_scene_feat, face_feat), 1)
-        # print("scene_face_feat.shape: ", scene_face_feat.shape)
 
         # In Frame?: scene + face feat -> in/out
         encoding_inout = self.compress_conv1_inout(scene_face_feat)
