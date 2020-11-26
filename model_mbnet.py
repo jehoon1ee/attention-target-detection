@@ -251,6 +251,7 @@ class ModelSpatial(nn.Module):
         scene_face_feat = torch.cat((attn_applied_scene_feat, face_feat), 1)
 
         # In Frame?: scene + face feat -> in/out
+        encoding_inout = 0
         # encoding_inout = self.compress_conv1_inout(scene_face_feat)
         # encoding_inout = self.compress_bn1_inout(encoding_inout)
         # encoding_inout = self.relu(encoding_inout)
