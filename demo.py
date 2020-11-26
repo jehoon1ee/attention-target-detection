@@ -33,7 +33,7 @@ def run():
 
     args = easydict.EasyDict({
         # "model_weights": "model_demo.pt",
-        "model_weights": "mbnet_weights_13.pt",
+        "model_weights": "mbnet_weights_12.pt",
         # "model_weights": "resnet_weights_3.pt",
         "image_dir": "data/demo/frames",
         "head": "data/demo/person1.txt",
