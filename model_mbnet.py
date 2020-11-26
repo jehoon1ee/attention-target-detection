@@ -267,24 +267,23 @@ class ModelSpatial(nn.Module):
         encoding_inout = self.fc_inout(encoding_inout)
 
         # Encode: scene + face feat -> encoding -> decoding
-        # encoding = self.compress_conv1(scene_face_feat)
-        # encoding = self.compress_bn1(encoding)
-        # encoding = self.relu(encoding)
-        # encoding = self.compress_conv2(encoding)
-        # encoding = self.compress_bn2(encoding)
-        # encoding = self.relu(encoding)
+        encoding = self.compress_conv1(scene_face_feat)
+        encoding = self.compress_bn1(encoding)
+        encoding = self.relu(encoding)
+        encoding = self.compress_conv2(encoding)
+        encoding = self.compress_bn2(encoding)
+        encoding = self.relu(encoding)
 
         # Decode
-        gaze_heatmap_pred = []
-        # gaze_heatmap_pred = self.deconv1(encoding)
-        # gaze_heatmap_pred = self.deconv_bn1(gaze_heatmap_pred)
-        # gaze_heatmap_pred = self.relu(gaze_heatmap_pred)
-        # gaze_heatmap_pred = self.deconv2(gaze_heatmap_pred)
-        # gaze_heatmap_pred = self.deconv_bn2(gaze_heatmap_pred)
-        # gaze_heatmap_pred = self.relu(gaze_heatmap_pred)
-        # gaze_heatmap_pred = self.deconv3(gaze_heatmap_pred)
-        # gaze_heatmap_pred = self.deconv_bn3(gaze_heatmap_pred)
-        # gaze_heatmap_pred = self.relu(gaze_heatmap_pred)
-        # gaze_heatmap_pred = self.conv4(gaze_heatmap_pred)
+        gaze_heatmap_pred = self.deconv1(encoding)
+        gaze_heatmap_pred = self.deconv_bn1(gaze_heatmap_pred)
+        gaze_heatmap_pred = self.relu(gaze_heatmap_pred)
+        gaze_heatmap_pred = self.deconv2(gaze_heatmap_pred)
+        gaze_heatmap_pred = self.deconv_bn2(gaze_heatmap_pred)
+        gaze_heatmap_pred = self.relu(gaze_heatmap_pred)
+        gaze_heatmap_pred = self.deconv3(gaze_heatmap_pred)
+        gaze_heatmap_pred = self.deconv_bn3(gaze_heatmap_pred)
+        gaze_heatmap_pred = self.relu(gaze_heatmap_pred)
+        gaze_heatmap_pred = self.conv4(gaze_heatmap_pred)
 
         return gaze_heatmap_pred, torch.mean(attn_weights, 1, keepdim=True), encoding_inout
