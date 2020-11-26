@@ -134,12 +134,12 @@ class MobileNetV2(nn.Module):
             [6, 320, 1, 1]
         ]
 
-        # self.stem_conv = conv7x7_nonlinear(ch_in, 64, stride=2)
-        self.stem_conv = conv3x3(ch_in, 32, stride=2)
+        self.stem_conv = conv7x7_nonlinear(ch_in, 64, stride=2)
+        # self.stem_conv = conv3x3(ch_in, 32, stride=2)
 
         layers = []
-        # input_channel = 64
-        input_channel = 32
+        input_channel = 64
+        # input_channel = 32
         for t, c, n, s in self.configs:
             for i in range(n):
                 stride = s if i == 0 else 1
@@ -192,15 +192,15 @@ class ModelSpatial(nn.Module):
         self.attn = nn.Linear(1808, 1*7*7)
 
         # In Frame?
-        self.compress_conv1_inout = nn.Conv2d(2048, 1024, kernel_size=1, stride=1, padding=0, bias=False)
-        self.compress_bn1_inout = nn.BatchNorm2d(1024)
-        self.compress_conv2_inout = nn.Conv2d(1024, 512, kernel_size=1, stride=1, padding=0, bias=False)
-        self.compress_bn2_inout = nn.BatchNorm2d(512)
-        self.compress_conv3_inout = nn.Conv2d(512, 256, kernel_size=1, stride=1, padding=0, bias=False)
-        self.compress_bn3_inout = nn.BatchNorm2d(256)
-        self.compress_conv4_inout = nn.Conv2d(256, 1, kernel_size=1, stride=1, padding=0, bias=False)
-        self.compress_bn4_inout = nn.BatchNorm2d(1)
-        self.fc_inout = nn.Linear(49, 1)
+        # self.compress_conv1_inout = nn.Conv2d(2048, 1024, kernel_size=1, stride=1, padding=0, bias=False)
+        # self.compress_bn1_inout = nn.BatchNorm2d(1024)
+        # self.compress_conv2_inout = nn.Conv2d(1024, 512, kernel_size=1, stride=1, padding=0, bias=False)
+        # self.compress_bn2_inout = nn.BatchNorm2d(512)
+        # self.compress_conv3_inout = nn.Conv2d(512, 256, kernel_size=1, stride=1, padding=0, bias=False)
+        # self.compress_bn3_inout = nn.BatchNorm2d(256)
+        # self.compress_conv4_inout = nn.Conv2d(256, 1, kernel_size=1, stride=1, padding=0, bias=False)
+        # self.compress_bn4_inout = nn.BatchNorm2d(1)
+        # self.fc_inout = nn.Linear(49, 1)
 
         # Encode: saliency
         self.compress_conv1 = nn.Conv2d(2048, 1024, kernel_size=1, stride=1, padding=0, bias=False)
@@ -251,20 +251,20 @@ class ModelSpatial(nn.Module):
         scene_face_feat = torch.cat((attn_applied_scene_feat, face_feat), 1)
 
         # In Frame?: scene + face feat -> in/out
-        encoding_inout = self.compress_conv1_inout(scene_face_feat)
-        encoding_inout = self.compress_bn1_inout(encoding_inout)
-        encoding_inout = self.relu(encoding_inout)
-        encoding_inout = self.compress_conv2_inout(encoding_inout)
-        encoding_inout = self.compress_bn2_inout(encoding_inout)
-        encoding_inout = self.relu(encoding_inout)
-        encoding_inout = self.compress_conv3_inout(encoding_inout)
-        encoding_inout = self.compress_bn3_inout(encoding_inout)
-        encoding_inout = self.relu(encoding_inout)
-        encoding_inout = self.compress_conv4_inout(encoding_inout)
-        encoding_inout = self.compress_bn4_inout(encoding_inout)
-        encoding_inout = self.relu(encoding_inout)
-        encoding_inout = encoding_inout.view(-1, 49)
-        encoding_inout = self.fc_inout(encoding_inout)
+        # encoding_inout = self.compress_conv1_inout(scene_face_feat)
+        # encoding_inout = self.compress_bn1_inout(encoding_inout)
+        # encoding_inout = self.relu(encoding_inout)
+        # encoding_inout = self.compress_conv2_inout(encoding_inout)
+        # encoding_inout = self.compress_bn2_inout(encoding_inout)
+        # encoding_inout = self.relu(encoding_inout)
+        # encoding_inout = self.compress_conv3_inout(encoding_inout)
+        # encoding_inout = self.compress_bn3_inout(encoding_inout)
+        # encoding_inout = self.relu(encoding_inout)
+        # encoding_inout = self.compress_conv4_inout(encoding_inout)
+        # encoding_inout = self.compress_bn4_inout(encoding_inout)
+        # encoding_inout = self.relu(encoding_inout)
+        # encoding_inout = encoding_inout.view(-1, 49)
+        # encoding_inout = self.fc_inout(encoding_inout)
 
         # Encode: scene + face feat -> encoding -> decoding
         encoding = self.compress_conv1(scene_face_feat)
