@@ -33,7 +33,7 @@ def run():
 
     args = easydict.EasyDict({
         # "model_weights": "model_demo.pt",
-        "model_weights": "mbnet_weights_6.pt",
+        "model_weights": "mbnet_weights_13.pt",
         # "model_weights": "resnet_weights_3.pt",
         "image_dir": "data/demo/frames",
         "head": "data/demo/person1.txt",
@@ -101,8 +101,8 @@ def run():
 
             inout = inout.cpu().detach().numpy()
             inout = 1 / (1 + np.exp(-inout))
-            # inout = (1 - inout) * 255
-            inout = ((1 - inout) * 255) / 2
+            inout = (1 - inout) * 255
+            # inout = ((1 - inout) * 255) / 2
 
             # norm_map = imresize(raw_hm, (height, width)) - inout
             norm_map = np.array(Image.fromarray(raw_hm).resize((width, height))) - inout
@@ -110,25 +110,23 @@ def run():
             # print (norm_map)
 
             # vis
-            # plt.close()
-            # fig = plt.figure()
-            # plt.axis('off')
-            # plt.imshow(frame_raw)
+            plt.close()
+            fig = plt.figure()
+            plt.axis('off')
+            plt.imshow(frame_raw)
 
-            # ax = plt.gca()
-            # rect = patches.Rectangle((head_box[0], head_box[1]), head_box[2]-head_box[0], head_box[3]-head_box[1], linewidth=2, edgecolor=(0,1,0), facecolor='none')
-            # ax.add_patch(rect)
+            ax = plt.gca()
+            rect = patches.Rectangle((head_box[0], head_box[1]), head_box[2]-head_box[0], head_box[3]-head_box[1], linewidth=2, edgecolor=(0,1,0), facecolor='none')
+            ax.add_patch(rect)
 
             # print ("inout: ", inout)
             # print ("out_threshold: ", args.out_threshold)
 
-            # plt.imshow(norm_map, cmap = 'jet', alpha=0.2, vmin=0, vmax=255)
+            plt.imshow(norm_map, cmap = 'jet', alpha=0.2, vmin=0, vmax=255)
 
-            # plt.show(block=False)
+            plt.show(block=False)
 
         print('DONE!')
-
-    # print(prof.key_averages(group_by_input_shape=True).table(sort_by="cuda_time_total", row_limit=20))
 
 if __name__ == "__main__":
     run()
