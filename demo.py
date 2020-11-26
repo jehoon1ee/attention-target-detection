@@ -110,21 +110,21 @@ def run():
             # print (norm_map)
 
             # vis
-            plt.close()
-            fig = plt.figure()
-            plt.axis('off')
-            plt.imshow(frame_raw)
-
-            ax = plt.gca()
-            rect = patches.Rectangle((head_box[0], head_box[1]), head_box[2]-head_box[0], head_box[3]-head_box[1], linewidth=2, edgecolor=(0,1,0), facecolor='none')
-            ax.add_patch(rect)
+            # plt.close()
+            # fig = plt.figure()
+            # plt.axis('off')
+            # plt.imshow(frame_raw)
+            #
+            # ax = plt.gca()
+            # rect = patches.Rectangle((head_box[0], head_box[1]), head_box[2]-head_box[0], head_box[3]-head_box[1], linewidth=2, edgecolor=(0,1,0), facecolor='none')
+            # ax.add_patch(rect)
 
             # print ("inout: ", inout)
             # print ("out_threshold: ", args.out_threshold)
 
-            plt.imshow(norm_map, cmap = 'jet', alpha=0.2, vmin=0, vmax=255)
-
-            plt.show(block=False)
+            # plt.imshow(norm_map, cmap = 'jet', alpha=0.2, vmin=0, vmax=255)
+            #
+            # plt.show(block=False)
 
         print('DONE!')
 
