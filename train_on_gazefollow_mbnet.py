@@ -63,7 +63,7 @@ def train():
                                                num_workers=0)
 
     # Set up log dir
-    logdir = os.path.join(args.log_dir, datetime.now().strftime('%Y-%m-%d_%H-%M-%S'))
+    logdir = os.path.join(args.log_dir, 'train_11')
     if os.path.exists(logdir):
         shutil.rmtree(logdir)
     os.makedirs(logdir)
@@ -79,11 +79,11 @@ def train():
     print("Loading init_weights ", args.init_weights)
     model = ModelSpatial()
     model.cuda().to(device)
-    # model_dict = model.state_dict()
-    # pretrained_dict = torch.load(args.init_weights)
-    # pretrained_dict = pretrained_dict['model']
-    # model_dict.update(pretrained_dict)
-    # model.load_state_dict(model_dict)
+    model_dict = model.state_dict()
+    pretrained_dict = torch.load(args.init_weights)
+    pretrained_dict = pretrained_dict['model']
+    model_dict.update(pretrained_dict)
+    model.load_state_dict(model_dict)
 
     # Loss functions
     mse_loss = nn.MSELoss(reduce=False) # not reducing in order to ignore outside cases
