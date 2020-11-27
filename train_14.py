@@ -2,7 +2,7 @@ import torch
 from torchvision import transforms
 import torch.nn as nn
 
-from model_mbnet import ModelSpatial
+from model_14 import ModelSpatial
 from mobilenetv2 import mobilenetv2
 from dataset import GazeFollow
 from config import *
