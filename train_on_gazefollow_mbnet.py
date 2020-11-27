@@ -24,7 +24,7 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--device", type=int, default=0, help="gpu id")
-parser.add_argument("--init_weights", type=str, default="mbnet_weights_13.pt", help="initial weights")
+parser.add_argument("--init_weights", type=str, default="mbnet_weights_11.pt", help="initial weights")
 parser.add_argument("--lr", type=float, default=2.5e-4, help="learning rate")
 parser.add_argument("--batch_size", type=int, default=48, help="batch size")
 parser.add_argument("--epochs", type=int, default=70, help="number of epochs")
@@ -63,7 +63,7 @@ def train():
                                                num_workers=0)
 
     # Set up log dir
-    logdir = os.path.join(args.log_dir, 'train_13')
+    logdir = os.path.join(args.log_dir, 'train_11')
     if os.path.exists(logdir):
         shutil.rmtree(logdir)
     os.makedirs(logdir)
@@ -107,23 +107,21 @@ def train():
             gaze_heatmap = gaze_heatmap.cuda().to(device)
 
             gaze_heatmap_pred, attmap, inout_pred = model(images, head, faces)
-            # gaze_heatmap_pred = gaze_heatmap_pred.squeeze(1)
+            gaze_heatmap_pred = gaze_heatmap_pred.squeeze(1)
 
             # [1] L2 loss computed only for inside case
-            l2_loss = 0
-            # l2_loss = mse_loss(gaze_heatmap_pred, gaze_heatmap) * loss_amp_factor
-            # l2_loss = torch.mean(l2_loss, dim=1)
-            # l2_loss = torch.mean(l2_loss, dim=1)
+            l2_loss = mse_loss(gaze_heatmap_pred, gaze_heatmap) * loss_amp_factor
+            l2_loss = torch.mean(l2_loss, dim=1)
+            l2_loss = torch.mean(l2_loss, dim=1)
 
             gaze_inside = gaze_inside.cuda(device).to(torch.float)
-            # l2_loss = torch.mul(l2_loss, gaze_inside) # zero out loss when it's out-of-frame gaze case
-            # l2_loss = torch.sum(l2_loss) / torch.sum(gaze_inside)
+            l2_loss = torch.mul(l2_loss, gaze_inside) # zero out loss when it's out-of-frame gaze case
+            l2_loss = torch.sum(l2_loss) / torch.sum(gaze_inside)
 
             # [2] cross entropy loss for in vs out
             Xent_loss = bcelogit_loss(inout_pred.squeeze(), gaze_inside.squeeze()) * 100
 
-            # total_loss = l2_loss + Xent_loss
-            total_loss = Xent_loss
+            total_loss = l2_loss + Xent_loss
             # NOTE: summed loss is used to train the main model.
             # l2_loss is used to get SOTA on GazeFollow benchmark.
             total_loss.backward() # loss accumulation
