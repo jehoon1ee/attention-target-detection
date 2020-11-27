@@ -24,7 +24,7 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--device", type=int, default=0, help="gpu id")
-parser.add_argument("--init_weights", type=str, default="mbnet_weights_11.pt", help="initial weights")
+parser.add_argument("--init_weights", type=str, default="mbnet_weights_12.pt", help="initial weights")
 parser.add_argument("--lr", type=float, default=2.5e-4, help="learning rate")
 parser.add_argument("--batch_size", type=int, default=48, help="batch size")
 parser.add_argument("--epochs", type=int, default=70, help="number of epochs")
@@ -63,7 +63,7 @@ def train():
                                                num_workers=0)
 
     # Set up log dir
-    logdir = os.path.join(args.log_dir, 'train_11')
+    logdir = os.path.join(args.log_dir, 'train_12')
     if os.path.exists(logdir):
         shutil.rmtree(logdir)
     os.makedirs(logdir)
