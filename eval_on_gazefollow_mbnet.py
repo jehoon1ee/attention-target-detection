@@ -117,8 +117,8 @@ def test():
                 inout = (1 - inout) * 255
                 norm_map = np.array(Image.fromarray(raw_hm).resize((tmp1, tmp2))) - inout
 
-                print("path: ", path[b_i])
-                frame_raw = Image.open(path[b_i])
+                print("path: ", os.path.join(gazefollow_val_data, path[b_i]))
+                frame_raw = Image.open(os.path.join(gazefollow_val_data, path[b_i]))
                 frame_raw = frame_raw.convert('RGB')
 
                 plt.close()
