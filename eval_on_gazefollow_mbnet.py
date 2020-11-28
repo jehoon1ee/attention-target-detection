@@ -117,7 +117,7 @@ def test():
                 inout = (1 - inout) * 255
                 norm_map = np.array(Image.fromarray(raw_hm).resize((tmp1, tmp2))) - inout
 
-                frame_raw = Image.open(os.path.join(path))
+                frame_raw = Image.open(path)
                 frame_raw = frame_raw.convert('RGB')
 
                 plt.close()
