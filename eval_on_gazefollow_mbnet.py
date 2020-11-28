@@ -19,7 +19,7 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--device", type=int, default=0, help="gpu id")
-parser.add_argument("--model_weights", type=str, default="mbnet_weights.pt", help="model weights")
+parser.add_argument("--model_weights", type=str, default="mbnet_weights_12.pt", help="model weights")
 parser.add_argument("--batch_size", type=int, default=48, help="batch size")
 args = parser.parse_args()
 
