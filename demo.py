@@ -18,10 +18,6 @@ import easydict
 import torchvision.models as models
 import torch.autograd.profiler as profiler
 
-# import torch.cuda.profiler as profiler
-# import pyprof
-# pyprof.init()
-
 def _get_transform():
     transform_list = []
     transform_list.append(transforms.Resize((input_resolution, input_resolution)))
@@ -70,7 +66,6 @@ def run():
             frame_raw = Image.open(os.path.join(args.image_dir, i))
             frame_raw = frame_raw.convert('RGB')
             width, height = frame_raw.size
-            # print ("frame_raw width: ", width, "height: ", height)
 
             head_box = [df.loc[i,'left'], df.loc[i,'top'], df.loc[i,'right'], df.loc[i,'bottom']]
 
@@ -85,10 +80,6 @@ def run():
             frame = frame.unsqueeze(0).cuda()
             head_channel = head_channel.unsqueeze(0).cuda()
 
-            # print("frame.shape: ", frame.shape)
-            # print("head.shape: ", head.shape)
-            # print("head_channel.shape: ", head_channel.shape)
-
             # forward pass
             raw_hm, _, inout = model(frame, head_channel, head)
             print("inout: ", inout)
@@ -96,18 +87,13 @@ def run():
             # heatmap modulation
             raw_hm = raw_hm.cpu().detach().numpy() * 255
             raw_hm = raw_hm.squeeze()
-            # print("raw_hm shape: ", raw_hm.shape)
-            # print ("raw_hm: ", raw_hm)
 
             inout = inout.cpu().detach().numpy()
             inout = 1 / (1 + np.exp(-inout))
             inout = (1 - inout) * 255
-            # inout = ((1 - inout) * 255) / 2
 
-            # norm_map = imresize(raw_hm, (height, width)) - inout
             norm_map = np.array(Image.fromarray(raw_hm).resize((width, height))) - inout
-            # print("norm_map shape: ", norm_map.shape)
-            # print (norm_map)
+            print("norm_map.shape: ", norm_map.shape)
 
             # vis
             # plt.close()
