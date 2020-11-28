@@ -60,7 +60,7 @@ def test():
 
     print('Evaluation in progress ...')
     model.train(False)
-    AUC = []; min_dist = []; avg_dist = []
+    AUC = []; min_dist = []; avg_dist = []; in_vs_out_groundtruth = []; in_vs_out_pred = []
 
     np.set_printoptions(threshold=sys.maxsize)
 
@@ -92,14 +92,14 @@ def test():
 
                 # remove padding and recover valid ground truth points
                 valid_gaze = cont_gaze[b_i]
-                if (val_batch == 0):
+                if (val_batch == 0 and b_i == 0):
                     print("before view() valid_gaze.shape: ", valid_gaze.shape)
                 valid_gaze = valid_gaze[valid_gaze != -1].view(-1,2)
-                if (val_batch == 0):
+                if (val_batch == 0 and b_i == 0):
                     print("after view() valid_gaze.shape: ", valid_gaze.shape)
                 # AUC: area under curve of ROC
                 multi_hot = imutils.multi_hot_targets(cont_gaze[b_i], imsize[b_i])
-                if (val_batch == 0):
+                if (val_batch == 0 and b_i == 0):
                     print("multi_hot.shape: ", multi_hot.shape)
                     print("imsize[b_i]: ", imsize[b_i])
 
@@ -107,7 +107,7 @@ def test():
                 tmp1 = imsize[b_i][0].item()
                 tmp2 = imsize[b_i][1].item()
                 scaled_heatmap = np.array(Image.fromarray(val_gaze_heatmap_pred[b_i].cpu().detach().numpy()).resize((tmp1, tmp2), Image.BILINEAR))
-                if (val_batch == 0):
+                if (val_batch == 0 and b_i == 0):
                     print("scaled_heatmap.shape: ", scaled_heatmap.shape)
                 auc_score = evaluation.auc(scaled_heatmap, multi_hot)
                 AUC.append(auc_score)
@@ -124,6 +124,10 @@ def test():
                 mean_gt_gaze = torch.mean(valid_gaze, 0)
                 avg_distance = evaluation.L2_dist(mean_gt_gaze, norm_p)
                 avg_dist.append(avg_distance)
+
+            # [4] Average Precision
+            # in_vs_out_groundtruth.extend(Y_pad_data_slice_inout.cpu().numpy())
+            # in_vs_out_pred.extend(inoval_inout_predut_val.cpu().numpy())
 
     print("\tAUC:{:.4f}\tmin dist:{:.4f}\tavg dist:{:.4f}".format(
           torch.mean(torch.tensor(AUC)),
