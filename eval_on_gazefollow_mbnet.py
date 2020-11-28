@@ -14,6 +14,9 @@ from PIL import Image
 import warnings
 import sys
 
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
 
@@ -68,6 +71,22 @@ def test():
         for val_batch, (val_img, val_face, val_head_channel, val_gaze_heatmap, cont_gaze, imsize, _) in enumerate(val_loader):
             print("val_batch: ", val_batch)
 
+            # val_images.shape:                 torch.Size([48, 3, 224, 224])
+            # val_head.shape:                   torch.Size([48, 1, 224, 224])
+            # val_faces.shape:                  torch.Size([48, 3, 224, 224])
+            # val_gaze_heatmap.shape:           torch.Size([48, 64, 64])
+            # cont_gaze.shape:                  torch.Size([48, 20, 2])
+            # imsize.shape:                     torch.Size([48, 2])
+            # val_gaze_heatmap_pred.shape:      torch.Size([48, 64, 64])
+            # val_attmap.shape:                 torch.Size([48, 1, 7, 7])
+            # val_inout_pred.shape:             torch.Size([48, 1])
+
+            # before view() valid_gaze.shape:   torch.Size([20, 2])
+            # after view() valid_gaze.shape:    torch.Size([10, 2])
+            # multi_hot.shape:                  (352, 500)
+            # imsize[b_i]:                      tensor([500, 352], dtype=torch.int32)
+            # scaled_heatmap.shape:             (352, 500)
+
             val_images = val_img.cuda().to(device)
             val_faces = val_face.cuda().to(device)
             val_head = val_head_channel.cuda().to(device)
@@ -76,41 +95,30 @@ def test():
             val_gaze_heatmap_pred, val_attmap, val_inout_pred = model(val_images, val_head, val_faces)
             val_gaze_heatmap_pred = val_gaze_heatmap_pred.squeeze(1)
 
-            if (val_batch == 0):
-                print("val_images.shape: ", val_images.shape)
-                print("val_head.shape: ", val_head.shape)
-                print("val_faces.shape: ", val_faces.shape)
-                print("val_gaze_heatmap.shape: ", val_gaze_heatmap.shape)
-                print("cont_gaze.shape: ", cont_gaze.shape)
-                print("imsize.shape: ", imsize.shape)
-                print("val_gaze_heatmap_pred.shape: ", val_gaze_heatmap_pred.shape)
-                print("val_attmap.shape: ", val_attmap.shape)
-                print("val_inout_pred.shape: ", val_inout_pred.shape)
-
             # go through each data point and record AUC, min dist, avg dist
             for b_i in range(len(cont_gaze)):
 
                 # remove padding and recover valid ground truth points
                 valid_gaze = cont_gaze[b_i]
-                if (val_batch == 0 and b_i == 0):
-                    print("before view() valid_gaze.shape: ", valid_gaze.shape)
                 valid_gaze = valid_gaze[valid_gaze != -1].view(-1,2)
-                if (val_batch == 0 and b_i == 0):
-                    print("after view() valid_gaze.shape: ", valid_gaze.shape)
-                # AUC: area under curve of ROC
-                multi_hot = imutils.multi_hot_targets(cont_gaze[b_i], imsize[b_i])
-                if (val_batch == 0 and b_i == 0):
-                    print("multi_hot.shape: ", multi_hot.shape)
-                    print("imsize[b_i]: ", imsize[b_i])
 
                 # [1] auc
+                multi_hot = imutils.multi_hot_targets(cont_gaze[b_i], imsize[b_i])
                 tmp1 = imsize[b_i][0].item()
                 tmp2 = imsize[b_i][1].item()
                 scaled_heatmap = np.array(Image.fromarray(val_gaze_heatmap_pred[b_i].cpu().detach().numpy()).resize((tmp1, tmp2), Image.BILINEAR))
-                if (val_batch == 0 and b_i == 0):
-                    print("scaled_heatmap.shape: ", scaled_heatmap.shape)
                 auc_score = evaluation.auc(scaled_heatmap, multi_hot)
                 AUC.append(auc_score)
+
+                raw_hm = val_gaze_heatmap_pred[b_i].cpu().detach().numpy() * 255
+                inout = val_inout_pred[b_i].cpu().detach().numpy()
+                inout = 1 / (1 + np.exp(-inout))
+                inout = (1 - inout) * 255
+                norm_map = np.array(Image.fromarray(raw_hm).resize((tmp1, tmp2))) - inout
+
+                plt.close()
+                fig = plt.figure()
+                plt.axis('off')
 
                 # [2] min distance: minimum among all possible pairs of <ground truth point, predicted point>
                 pred_x, pred_y = evaluation.argmax_pts(val_gaze_heatmap_pred[b_i].cpu().detach().numpy())
@@ -125,14 +133,12 @@ def test():
                 avg_distance = evaluation.L2_dist(mean_gt_gaze, norm_p)
                 avg_dist.append(avg_distance)
 
-            # [4] Average Precision
-            # in_vs_out_groundtruth.extend(Y_pad_data_slice_inout.cpu().numpy())
-            # in_vs_out_pred.extend(inoval_inout_predut_val.cpu().numpy())
-
     print("\tAUC:{:.4f}\tmin dist:{:.4f}\tavg dist:{:.4f}".format(
           torch.mean(torch.tensor(AUC)),
           torch.mean(torch.tensor(min_dist)),
-          torch.mean(torch.tensor(avg_dist))))
+          torch.mean(torch.tensor(avg_dist))
+          )
+    )
 
 
 if __name__ == "__main__":
