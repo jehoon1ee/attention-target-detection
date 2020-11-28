@@ -68,7 +68,7 @@ def test():
     np.set_printoptions(threshold=sys.maxsize)
 
     with torch.no_grad():
-        for val_batch, (val_img, val_face, val_head_channel, val_gaze_heatmap, cont_gaze, imsize, _) in enumerate(val_loader):
+        for val_batch, (val_img, val_face, val_head_channel, val_gaze_heatmap, cont_gaze, imsize, path) in enumerate(val_loader):
             print("val_batch: ", val_batch)
 
             # val_images.shape:                 torch.Size([48, 3, 224, 224])
@@ -110,15 +110,23 @@ def test():
                 auc_score = evaluation.auc(scaled_heatmap, multi_hot)
                 AUC.append(auc_score)
 
+                ###############
                 raw_hm = val_gaze_heatmap_pred[b_i].cpu().detach().numpy() * 255
                 inout = val_inout_pred[b_i].cpu().detach().numpy()
                 inout = 1 / (1 + np.exp(-inout))
                 inout = (1 - inout) * 255
                 norm_map = np.array(Image.fromarray(raw_hm).resize((tmp1, tmp2))) - inout
 
+                frame_raw = Image.open(os.path.join(path))
+                frame_raw = frame_raw.convert('RGB')
+
                 plt.close()
                 fig = plt.figure()
                 plt.axis('off')
+                plt.imshow(frame_raw)
+                plt.imshow(norm_map, cmap = 'jet', alpha=0.2, vmin = 0, vmax = 255)
+                plt.show(block=False)
+                ###############
 
                 # [2] min distance: minimum among all possible pairs of <ground truth point, predicted point>
                 pred_x, pred_y = evaluation.argmax_pts(val_gaze_heatmap_pred[b_i].cpu().detach().numpy())
