@@ -93,7 +93,7 @@ def run():
             inout = (1 - inout) * 255
 
             norm_map = np.array(Image.fromarray(raw_hm).resize((width, height))) - inout
-            print("norm_map.shape: ", norm_map.shape)
+            # print("norm_map.shape: ", norm_map.shape)
 
             # vis
             # plt.close()
