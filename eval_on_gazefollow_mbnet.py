@@ -111,22 +111,22 @@ def test():
                 AUC.append(auc_score)
 
                 ###############
-                raw_hm = val_gaze_heatmap_pred[b_i].cpu().detach().numpy() * 255
-                inout = val_inout_pred[b_i].cpu().detach().numpy()
-                inout = 1 / (1 + np.exp(-inout))
-                inout = (1 - inout) * 255
-                norm_map = np.array(Image.fromarray(raw_hm).resize((tmp1, tmp2))) - inout
-
-                print("path: ", os.path.join(gazefollow_val_data, path[b_i]))
-                frame_raw = Image.open(os.path.join(gazefollow_val_data, path[b_i]))
-                frame_raw = frame_raw.convert('RGB')
-
-                plt.close()
-                fig = plt.figure()
-                plt.axis('off')
-                plt.imshow(frame_raw)
-                plt.imshow(norm_map, cmap = 'jet', alpha=0.2, vmin = 0, vmax = 255)
-                plt.show(block=False)
+                # raw_hm = val_gaze_heatmap_pred[b_i].cpu().detach().numpy() * 255
+                # inout = val_inout_pred[b_i].cpu().detach().numpy()
+                # inout = 1 / (1 + np.exp(-inout))
+                # inout = (1 - inout) * 255
+                # norm_map = np.array(Image.fromarray(raw_hm).resize((tmp1, tmp2))) - inout
+                #
+                # print("path: ", os.path.join(gazefollow_val_data, path[b_i]))
+                # frame_raw = Image.open(os.path.join(gazefollow_val_data, path[b_i]))
+                # frame_raw = frame_raw.convert('RGB')
+                #
+                # plt.close()
+                # fig = plt.figure()
+                # plt.axis('off')
+                # plt.imshow(frame_raw)
+                # plt.imshow(norm_map, cmap = 'jet', alpha=0.2, vmin = 0, vmax = 255)
+                # plt.show(block=False)
                 ###############
 
                 # [2] min distance: minimum among all possible pairs of <ground truth point, predicted point>
