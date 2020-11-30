@@ -100,6 +100,9 @@ def train():
     print("Training in progress ...")
     for ep in range(args.epochs):
         for batch, (img, face, head_channel, gaze_heatmap, name, gaze_inside) in enumerate(train_loader):
+            # gazeheatmap_pred.shape:                       torch.Size([48, 64, 64])
+            # gaze_heatmap.shape:                           torch.Size([48, 64, 64])
+
             model.train(True)
             images = img.cuda().to(device)
             head = head_channel.cuda().to(device)
@@ -108,8 +111,6 @@ def train():
 
             gaze_heatmap_pred, attmap, inout_pred = model(images, head, faces)
             gaze_heatmap_pred = gaze_heatmap_pred.squeeze(1)
-            print("gaze_heatmap_pred.shape: ", gaze_heatmap_pred.shape)
-            print("gaze_heatmap.shape: ", gaze_heatmap.shape)
 
             # [1] L2 loss computed only for inside case
             l2_loss = mse_loss(gaze_heatmap_pred, gaze_heatmap) * loss_amp_factor

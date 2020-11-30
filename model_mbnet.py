@@ -245,6 +245,7 @@ class ModelSpatial(nn.Module):
         # Scene Conv
         im = torch.cat((images, head), dim=1)
         scene_feat = self.mbnet_scene_conv(im)
+        print("scene_feat.shape: ", scene_feat.shape)
 
         attn_applied_scene_feat = torch.mul(attn_weights, scene_feat) # (N, 1, 7, 7) # applying attention weights on scene feat
 
