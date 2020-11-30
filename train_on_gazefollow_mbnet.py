@@ -108,6 +108,8 @@ def train():
 
             gaze_heatmap_pred, attmap, inout_pred = model(images, head, faces)
             gaze_heatmap_pred = gaze_heatmap_pred.squeeze(1)
+            print("gaze_heatmap_pred.shape: ", gaze_heatmap_pred.shape)
+            print("gaze_heatmap.shape: ", gaze_heatmap.shape)
 
             # [1] L2 loss computed only for inside case
             l2_loss = mse_loss(gaze_heatmap_pred, gaze_heatmap) * loss_amp_factor
