@@ -2,11 +2,12 @@ import torch
 from torchvision import transforms
 import torch.nn as nn
 
+
 from model_mbnet import ModelSpatial
-from mobilenetv2 import mobilenetv2
 from dataset import GazeFollow
 from config import *
 from utils import imutils, evaluation
+
 
 import argparse
 import os
@@ -158,10 +159,10 @@ def train():
                             valid_gaze = valid_gaze[valid_gaze != -1].view(-1,2)
 
                             # [1] auc
-                            multi_hot = imutils.multi_hot_targets(cont_gaze[b_i], imsize[b_i])
                             tmp1 = imsize[b_i][0].item()
                             tmp2 = imsize[b_i][1].item()
                             scaled_heatmap = np.array(Image.fromarray(val_gaze_heatmap_pred[b_i].cpu().detach().numpy()).resize((tmp1, tmp2), Image.BILINEAR))
+                            multi_hot = imutils.multi_hot_targets(cont_gaze[b_i], imsize[b_i])
                             auc_score = evaluation.auc(scaled_heatmap, multi_hot)
                             AUC.append(auc_score)
 
