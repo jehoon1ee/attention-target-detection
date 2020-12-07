@@ -255,10 +255,6 @@ class ModelSpatial(nn.Module):
         # print("head.shape: ", head.shape) # [48, 1, 224, 224]
         # print("face.shape: ", face.shape) # [48, 3, 224, 224]
 
-        # reduce head channel size by max pooling: (N, 1, 224, 224) -> (N, 1, 28, 28)
-        head_reduced = self.maxpool(self.maxpool(self.maxpool(head))).view(-1, 784)
-        # print("head_reduced.shape: ", head_reduced.shape) # [48, 784]
-
         # Head Conv mbnet
         # face_feat = self.mbnet(face)
 
@@ -276,18 +272,24 @@ class ModelSpatial(nn.Module):
         print(prof.key_averages().table(sort_by="cpu_time_total"))
         # print("face_feat.shape: ", face_feat.shape) # [48, 1024, 7, 7]
 
-        # reduce face feature size by avg pooling: (N, 1024, 7, 7) -> (N, 1024, 1, 1)
-        face_feat_reduced = self.avgpool(face_feat).view(-1, 1024)
+        with profiler.profile(use_cuda=True) as prof:
+            # reduce head channel size by max pooling: (N, 1, 224, 224) -> (N, 1, 28, 28)
+            head_reduced = self.maxpool(self.maxpool(self.maxpool(head))).view(-1, 784)
+            # print("head_reduced.shape: ", head_reduced.shape) # [48, 784]
 
-        # get and reshape attention weights such that it can be multiplied with scene feature map
-        attn_weights = self.attn(torch.cat((head_reduced, face_feat_reduced), 1))
-        attn_weights = attn_weights.view(-1, 1, 49)
-        attn_weights = F.softmax(attn_weights, dim=2) # soft attention weights single-channel
-        attn_weights = attn_weights.view(-1, 1, 7, 7)
+            # reduce face feature size by avg pooling: (N, 1024, 7, 7) -> (N, 1024, 1, 1)
+            face_feat_reduced = self.avgpool(face_feat).view(-1, 1024)
 
-        # Scene Conv
-        im = torch.cat((images, head), dim=1)
-        # scene_feat = self.mbnet2(im)
+            # get and reshape attention weights such that it can be multiplied with scene feature map
+            attn_weights = self.attn(torch.cat((head_reduced, face_feat_reduced), 1))
+            attn_weights = attn_weights.view(-1, 1, 49)
+            attn_weights = F.softmax(attn_weights, dim=2) # soft attention weights single-channel
+            attn_weights = attn_weights.view(-1, 1, 7, 7)
+
+            # Scene Conv
+            im = torch.cat((images, head), dim=1)
+            # scene_feat = self.mbnet2(im)
+        print(prof.key_averages().table(sort_by="cpu_time_total"))
 
         with profiler.profile(use_cuda=True) as prof:
             im = self.conv1_scene(im)
