@@ -263,7 +263,7 @@ class ModelSpatial(nn.Module):
         # face_feat = self.mbnet(face)
 
         # Head Conv
-        with profiler.profile(record_shapes=True) as prof:
+        with profiler.profile(use_cuda=True) as prof:
             face = self.conv1_face(face)
             face = self.bn1_face(face)
             face = self.relu(face)
@@ -289,7 +289,7 @@ class ModelSpatial(nn.Module):
         im = torch.cat((images, head), dim=1)
         # scene_feat = self.mbnet2(im)
 
-        with profiler.profile(record_shapes=True) as prof:
+        with profiler.profile(use_cuda=True) as prof:
             im = self.conv1_scene(im)
             im = self.bn1_scene(im)
             im = self.relu(im)
@@ -303,7 +303,7 @@ class ModelSpatial(nn.Module):
         # print("scene_feat.shape: ", scene_feat.shape) # [48, 1024, 7, 7]
         # attn_weights = torch.ones(attn_weights.shape)/49.0
 
-        with profiler.profile(record_shapes=True) as prof:
+        with profiler.profile(use_cuda=True) as prof:
 
             attn_applied_scene_feat = torch.mul(attn_weights, scene_feat) # (N, 1, 7, 7) # applying attention weights on scene feat
 
