@@ -273,7 +273,7 @@ class ModelSpatial(nn.Module):
             face = self.layer3_face(face)
             face = self.layer4_face(face)
             face_feat = self.layer5_face(face)
-        print(prof.key_averages().table(sort_by="cpu_time_total", row_limit=20))
+        print(prof)
         # print("face_feat.shape: ", face_feat.shape) # [48, 1024, 7, 7]
 
         # reduce face feature size by avg pooling: (N, 1024, 7, 7) -> (N, 1024, 1, 1)
@@ -299,7 +299,7 @@ class ModelSpatial(nn.Module):
             im = self.layer3_scene(im)
             im = self.layer4_scene(im)
             scene_feat = self.layer5_scene(im)
-        print(prof.key_averages().table(sort_by="cpu_time_total", row_limit=20))
+        print(prof)
         # print("scene_feat.shape: ", scene_feat.shape) # [48, 1024, 7, 7]
         # attn_weights = torch.ones(attn_weights.shape)/49.0
 
@@ -339,7 +339,7 @@ class ModelSpatial(nn.Module):
             gaze_heatmap_pred = self.relu(gaze_heatmap_pred)
             gaze_heatmap_pred = self.conv4(gaze_heatmap_pred)
 
-        print(prof.key_averages().table(sort_by="cpu_time_total", row_limit=20))
+        print(prof)
 
         return gaze_heatmap_pred, torch.mean(attn_weights, 1, keepdim=True), encoding_inout
 
