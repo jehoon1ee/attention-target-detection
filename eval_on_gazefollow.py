@@ -20,7 +20,7 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--device", type=int, default=0, help="gpu id")
-parser.add_argument("--model_weights", type=str, default="resnet_weights.pt", help="model weights")
+parser.add_argument("--model_weights", type=str, default="model_demo.pt", help="model weights")
 parser.add_argument("--batch_size", type=int, default=48, help="batch size")
 args = parser.parse_args()
 
@@ -89,47 +89,47 @@ def test():
                 print("val_inout_pred.shape: ", val_inout_pred.shape)
 
             # go through each data point and record AUC, min dist, avg dist
-            for b_i in range(len(cont_gaze)):
-
-                # remove padding and recover valid ground truth points
-                valid_gaze = cont_gaze[b_i]
-                if (val_batch == 0):
-                    print("before view() valid_gaze.shape: ", valid_gaze.shape)
-                valid_gaze = valid_gaze[valid_gaze != -1].view(-1,2)
-                if (val_batch == 0):
-                    print("after view() valid_gaze.shape: ", valid_gaze.shape)
-                # AUC: area under curve of ROC
-                multi_hot = imutils.multi_hot_targets(cont_gaze[b_i], imsize[b_i])
-                if (val_batch == 0):
-                    print("multi_hot.shape: ", multi_hot.shape)
-                    print("imsize[b_i]: ", imsize[b_i])
-
-                # [1] auc
-                tmp1 = imsize[b_i][0].item()
-                tmp2 = imsize[b_i][1].item()
-                scaled_heatmap = np.array(Image.fromarray(val_gaze_heatmap_pred[b_i].cpu().detach().numpy()).resize((tmp1, tmp2), Image.BILINEAR))
-                if (val_batch == 0):
-                    print("scaled_heatmap.shape: ", scaled_heatmap.shape)
-                auc_score = evaluation.auc(scaled_heatmap, multi_hot)
-                AUC.append(auc_score)
-
-                # [2] min distance: minimum among all possible pairs of <ground truth point, predicted point>
-                pred_x, pred_y = evaluation.argmax_pts(val_gaze_heatmap_pred[b_i].cpu().detach().numpy())
-                norm_p = [pred_x/float(output_resolution), pred_y/float(output_resolution)]
-                all_distances = []
-                for gt_gaze in valid_gaze:
-                    all_distances.append(evaluation.L2_dist(gt_gaze, norm_p))
-                min_dist.append(min(all_distances))
-
-                # [3] average distance: distance between the predicted point and human average point
-                mean_gt_gaze = torch.mean(valid_gaze, 0)
-                avg_distance = evaluation.L2_dist(mean_gt_gaze, norm_p)
-                avg_dist.append(avg_distance)
-
-    print("\tAUC:{:.4f}\tmin dist:{:.4f}\tavg dist:{:.4f}".format(
-          torch.mean(torch.tensor(AUC)),
-          torch.mean(torch.tensor(min_dist)),
-          torch.mean(torch.tensor(avg_dist))))
+    #         for b_i in range(len(cont_gaze)):
+    #
+    #             # remove padding and recover valid ground truth points
+    #             valid_gaze = cont_gaze[b_i]
+    #             if (val_batch == 0):
+    #                 print("before view() valid_gaze.shape: ", valid_gaze.shape)
+    #             valid_gaze = valid_gaze[valid_gaze != -1].view(-1,2)
+    #             if (val_batch == 0):
+    #                 print("after view() valid_gaze.shape: ", valid_gaze.shape)
+    #             # AUC: area under curve of ROC
+    #             multi_hot = imutils.multi_hot_targets(cont_gaze[b_i], imsize[b_i])
+    #             if (val_batch == 0):
+    #                 print("multi_hot.shape: ", multi_hot.shape)
+    #                 print("imsize[b_i]: ", imsize[b_i])
+    #
+    #             # [1] auc
+    #             tmp1 = imsize[b_i][0].item()
+    #             tmp2 = imsize[b_i][1].item()
+    #             scaled_heatmap = np.array(Image.fromarray(val_gaze_heatmap_pred[b_i].cpu().detach().numpy()).resize((tmp1, tmp2), Image.BILINEAR))
+    #             if (val_batch == 0):
+    #                 print("scaled_heatmap.shape: ", scaled_heatmap.shape)
+    #             auc_score = evaluation.auc(scaled_heatmap, multi_hot)
+    #             AUC.append(auc_score)
+    #
+    #             # [2] min distance: minimum among all possible pairs of <ground truth point, predicted point>
+    #             pred_x, pred_y = evaluation.argmax_pts(val_gaze_heatmap_pred[b_i].cpu().detach().numpy())
+    #             norm_p = [pred_x/float(output_resolution), pred_y/float(output_resolution)]
+    #             all_distances = []
+    #             for gt_gaze in valid_gaze:
+    #                 all_distances.append(evaluation.L2_dist(gt_gaze, norm_p))
+    #             min_dist.append(min(all_distances))
+    #
+    #             # [3] average distance: distance between the predicted point and human average point
+    #             mean_gt_gaze = torch.mean(valid_gaze, 0)
+    #             avg_distance = evaluation.L2_dist(mean_gt_gaze, norm_p)
+    #             avg_dist.append(avg_distance)
+    #
+    # print("\tAUC:{:.4f}\tmin dist:{:.4f}\tavg dist:{:.4f}".format(
+    #       torch.mean(torch.tensor(AUC)),
+    #       torch.mean(torch.tensor(min_dist)),
+    #       torch.mean(torch.tensor(avg_dist))))
 
 
 if __name__ == "__main__":
