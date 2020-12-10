@@ -228,63 +228,72 @@ class ModelSpatial(nn.Module):
 
     def forward(self, images, head, face):
         # Head Conv mbnet
-        face_feat = self.mbnet_head_conv(face)
+        with profiler.profile(use_cuda=True) as prof:
+            face_feat = self.mbnet_head_conv(face)
+        print(prof.key_averages().table(sort_by="cpu_time_total"))
 
-        # reduce face feature size by avg pooling: (N, 1024, 7, 7) -> (N, 1024, 1, 1)
-        face_feat_reduced = self.avgpool(face_feat).view(-1, 1024)
+        with profiler.profile(use_cuda=True) as prof:
+            # reduce face feature size by avg pooling: (N, 1024, 7, 7) -> (N, 1024, 1, 1)
+            face_feat_reduced = self.avgpool(face_feat).view(-1, 1024)
 
-        # reduce head channel size by max pooling: (N, 1, 224, 224) -> (N, 1, 28, 28)
-        head_reduced = self.maxpool(self.maxpool(self.maxpool(head))).view(-1, 784)
+            # reduce head channel size by max pooling: (N, 1, 224, 224) -> (N, 1, 28, 28)
+            head_reduced = self.maxpool(self.maxpool(self.maxpool(head))).view(-1, 784)
 
-        # get and reshape attention weights such that it can be multiplied with scene feature map
-        attn_weights = self.attn(torch.cat((head_reduced, face_feat_reduced), 1))
-        attn_weights = attn_weights.view(-1, 1, 49)
-        attn_weights = F.softmax(attn_weights, dim=2) # soft attention weights single-channel
-        attn_weights = attn_weights.view(-1, 1, 7, 7)
+            # get and reshape attention weights such that it can be multiplied with scene feature map
+            attn_weights = self.attn(torch.cat((head_reduced, face_feat_reduced), 1))
+            attn_weights = attn_weights.view(-1, 1, 49)
+            attn_weights = F.softmax(attn_weights, dim=2) # soft attention weights single-channel
+            attn_weights = attn_weights.view(-1, 1, 7, 7)
 
-        # Scene Conv
-        im = torch.cat((images, head), dim=1)
-        scene_feat = self.mbnet_scene_conv(im) # torch.Size([48, 1024, 7, 7])
+            # Scene Conv
+            im = torch.cat((images, head), dim=1)
+        print(prof.key_averages().table(sort_by="cpu_time_total"))
 
-        attn_applied_scene_feat = torch.mul(attn_weights, scene_feat) # (N, 1, 7, 7) # applying attention weights on scene feat
+        with profiler.profile(use_cuda=True) as prof:
+            scene_feat = self.mbnet_scene_conv(im) # torch.Size([48, 1024, 7, 7])
+        print(prof.key_averages().table(sort_by="cpu_time_total"))
 
-        scene_face_feat = torch.cat((attn_applied_scene_feat, face_feat), 1)
+        with profiler.profile(use_cuda=True) as prof:
+            attn_applied_scene_feat = torch.mul(attn_weights, scene_feat) # (N, 1, 7, 7) # applying attention weights on scene feat
 
-        # In Frame?: scene + face feat -> in/out
-        encoding_inout = self.compress_conv1_inout(scene_face_feat)
-        encoding_inout = self.compress_bn1_inout(encoding_inout)
-        encoding_inout = self.relu(encoding_inout)
-        encoding_inout = self.compress_conv2_inout(encoding_inout)
-        encoding_inout = self.compress_bn2_inout(encoding_inout)
-        encoding_inout = self.relu(encoding_inout)
-        encoding_inout = self.compress_conv3_inout(encoding_inout)
-        encoding_inout = self.compress_bn3_inout(encoding_inout)
-        encoding_inout = self.relu(encoding_inout)
-        encoding_inout = self.compress_conv4_inout(encoding_inout)
-        encoding_inout = self.compress_bn4_inout(encoding_inout)
-        encoding_inout = self.relu(encoding_inout)
-        encoding_inout = encoding_inout.view(-1, 49)
-        encoding_inout = self.fc_inout(encoding_inout)
+            scene_face_feat = torch.cat((attn_applied_scene_feat, face_feat), 1)
 
-        # Encode: scene + face feat -> encoding -> decoding
-        encoding = self.compress_conv1(scene_face_feat)
-        encoding = self.compress_bn1(encoding)
-        encoding = self.relu(encoding)
-        encoding = self.compress_conv2(encoding)
-        encoding = self.compress_bn2(encoding)
-        encoding = self.relu(encoding)
+            # In Frame?: scene + face feat -> in/out
+            encoding_inout = self.compress_conv1_inout(scene_face_feat)
+            encoding_inout = self.compress_bn1_inout(encoding_inout)
+            encoding_inout = self.relu(encoding_inout)
+            encoding_inout = self.compress_conv2_inout(encoding_inout)
+            encoding_inout = self.compress_bn2_inout(encoding_inout)
+            encoding_inout = self.relu(encoding_inout)
+            encoding_inout = self.compress_conv3_inout(encoding_inout)
+            encoding_inout = self.compress_bn3_inout(encoding_inout)
+            encoding_inout = self.relu(encoding_inout)
+            encoding_inout = self.compress_conv4_inout(encoding_inout)
+            encoding_inout = self.compress_bn4_inout(encoding_inout)
+            encoding_inout = self.relu(encoding_inout)
+            encoding_inout = encoding_inout.view(-1, 49)
+            encoding_inout = self.fc_inout(encoding_inout)
 
-        # Decode
-        gaze_heatmap_pred = []
-        gaze_heatmap_pred = self.deconv1(encoding)
-        gaze_heatmap_pred = self.deconv_bn1(gaze_heatmap_pred)
-        gaze_heatmap_pred = self.relu(gaze_heatmap_pred)
-        gaze_heatmap_pred = self.deconv2(gaze_heatmap_pred)
-        gaze_heatmap_pred = self.deconv_bn2(gaze_heatmap_pred)
-        gaze_heatmap_pred = self.relu(gaze_heatmap_pred)
-        gaze_heatmap_pred = self.deconv3(gaze_heatmap_pred)
-        gaze_heatmap_pred = self.deconv_bn3(gaze_heatmap_pred)
-        gaze_heatmap_pred = self.relu(gaze_heatmap_pred)
-        gaze_heatmap_pred = self.conv4(gaze_heatmap_pred)
+            # Encode: scene + face feat -> encoding -> decoding
+            encoding = self.compress_conv1(scene_face_feat)
+            encoding = self.compress_bn1(encoding)
+            encoding = self.relu(encoding)
+            encoding = self.compress_conv2(encoding)
+            encoding = self.compress_bn2(encoding)
+            encoding = self.relu(encoding)
+
+            # Decode
+            gaze_heatmap_pred = []
+            gaze_heatmap_pred = self.deconv1(encoding)
+            gaze_heatmap_pred = self.deconv_bn1(gaze_heatmap_pred)
+            gaze_heatmap_pred = self.relu(gaze_heatmap_pred)
+            gaze_heatmap_pred = self.deconv2(gaze_heatmap_pred)
+            gaze_heatmap_pred = self.deconv_bn2(gaze_heatmap_pred)
+            gaze_heatmap_pred = self.relu(gaze_heatmap_pred)
+            gaze_heatmap_pred = self.deconv3(gaze_heatmap_pred)
+            gaze_heatmap_pred = self.deconv_bn3(gaze_heatmap_pred)
+            gaze_heatmap_pred = self.relu(gaze_heatmap_pred)
+            gaze_heatmap_pred = self.conv4(gaze_heatmap_pred)
+        print(prof.key_averages().table(sort_by="cpu_time_total"))
 
         return gaze_heatmap_pred, torch.mean(attn_weights, 1, keepdim=True), encoding_inout

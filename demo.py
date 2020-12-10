@@ -9,8 +9,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 from PIL import Image
-# from model_mbnet import ModelSpatial
-from model import ModelSpatial
+from model_mbnet import ModelSpatial
+# from model import ModelSpatial
 from utils import imutils, evaluation
 from config import *
 import easydict
@@ -28,8 +28,8 @@ def _get_transform():
 def run():
 
     args = easydict.EasyDict({
-        "model_weights": "model_demo.pt",
-        # "model_weights": "mbnet_weights_12.pt",
+        # "model_weights": "model_demo.pt",
+        "model_weights": "mbnet_weights_12.pt",
         # "model_weights": "resnet_weights_3.pt",
         "image_dir": "data/demo/frames",
         "head": "data/demo/person1.txt",
